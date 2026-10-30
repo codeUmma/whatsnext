@@ -46,7 +46,7 @@ button {cursor:pointer}
   display:flex;
   align-items:center;
   gap:0;
-  padding:12px 0 11px;
+  padding:4px 0;
   border-bottom:1px solid var(--line);
   position:sticky;
   top:0;
@@ -79,22 +79,23 @@ button {cursor:pointer}
 }
 
 /* MAIN PANELS */
-main {flex:1;padding:14px 12px 18px}
+main {flex:1;padding:6px 8px 14px}
 .panels {
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:7px;
 }
 .panel {
   width:100%;
   min-width:0;
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:15px;
-  overflow:hidden;
-  box-shadow:var(--shadow);
+  background:transparent;
+  border:0;
+  border-bottom:1px solid var(--line);
+  border-radius:0;
+  overflow:visible;
+  box-shadow:none;
 }
-.panel-toolbar{display:flex;align-items:center;gap:6px;width:100%;background:#fff;border-bottom:1px solid var(--line);padding:2px 5px}
+.panel-toolbar{display:flex;align-items:center;gap:6px;width:100%;background:transparent;border-bottom:0;padding:0}
 .panel-toolbar .panel-head{flex:1;min-width:0}
 .panel-manage,.panel-add{flex:none;margin-right:2px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:7px 9px;font-size:12px;white-space:nowrap}.panel-add{width:42px;height:42px;padding:0;display:grid;place-items:center;background:#e7eee5;border-color:#cdd9ca;color:#47634a;font-size:27px;font-weight:700;line-height:1}.panel-manage{font-weight:650}
 .panel-head {
@@ -102,7 +103,7 @@ main {flex:1;padding:14px 12px 18px}
   display:flex;
   align-items:center;
   gap:10px;
-  padding:14px 15px;
+  padding:9px 10px;
   border:0;
   background:transparent;
   text-align:left;
@@ -119,7 +120,7 @@ main {flex:1;padding:14px 12px 18px}
   padding:0;
   background:transparent;
   border-top:0;
-  min-height:78px;
+  min-height:0;
 }
 /* Keep embedded documents mounted on mobile browsers while panels are folded. */
 .panel.collapsed .panel-body {
@@ -475,7 +476,7 @@ function createPanel(id){
  const p=document.createElement('article');p.className='panel';
  const head=document.createElement('button');head.className='panel-head';head.dataset.collapse=id;head.innerHTML=`${icon(m.symbol)}<span>${panelLabel}</span><span class="chev">⌃</span>`;
  const toolbar=document.createElement('div');toolbar.className='panel-toolbar';toolbar.append(head);
- if(id==='shopping'){const addItem=document.createElement('button');addItem.type='button';addItem.className='panel-add';addItem.textContent='＋';addItem.setAttribute('aria-label','아이템 추가');addItem.onclick=e=>{e.stopPropagation();const f=document.querySelector('#shoppingFrame');if(f?.contentWindow?.openShoppingItemEditor)f.contentWindow.openShoppingItemEditor(null);else toast('쇼핑리스트를 먼저 불러오는 중이에요')};const manage=document.createElement('button');manage.type='button';manage.className='panel-manage';manage.textContent='가게 관리';manage.onclick=e=>{e.stopPropagation();const f=document.querySelector('#shoppingFrame');if(f?.contentWindow?.openStoreManager)f.contentWindow.openStoreManager();else toast('쇼핑리스트를 먼저 불러오는 중이에요')};const bulk=document.createElement("button");bulk.type="button";bulk.className="panel-manage";bulk.textContent="목록 한꺼번에";bulk.onclick=e=>{e.stopPropagation();const f=document.querySelector("#shoppingFrame");if(f?.contentWindow?.openShoppingBulkEntry)f.contentWindow.openShoppingBulkEntry();else toast("쇼핑리스트를 먼저 불러오는 중이에요")};toolbar.append(addItem,bulk,manage)}
+ if(id==='shopping'){const addItem=document.createElement('button');addItem.type='button';addItem.className='panel-add';addItem.textContent='＋';addItem.setAttribute('aria-label','아이템 추가');addItem.onclick=e=>{e.stopPropagation();const f=document.querySelector('#shoppingFrame');if(f?.contentWindow?.openShoppingItemEditor)f.contentWindow.openShoppingItemEditor(null);else toast('쇼핑리스트를 먼저 불러오는 중이에요')};const manage=document.createElement('button');manage.type='button';manage.className='panel-manage';manage.textContent='가게';manage.setAttribute('aria-label','가게 관리');manage.onclick=e=>{e.stopPropagation();const f=document.querySelector('#shoppingFrame');if(f?.contentWindow?.openStoreManager)f.contentWindow.openStoreManager();else toast('쇼핑리스트를 먼저 불러오는 중이에요')};toolbar.append(addItem,manage)}
  const body=document.createElement('div');body.className='panel-body';
  if(id==='meal'){
    const quickHost=document.createElement('div');quickHost.innerHTML=quickRecordsMarkup('meal');body.append(quickHost.firstElementChild);
