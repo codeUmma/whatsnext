@@ -86,8 +86,8 @@ button {cursor:pointer}
 }
 
 /* MAIN PANELS — compact, consistent full-height sections */
-main {flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding:0 4px 8px}
-.panels{display:flex;flex-direction:column;gap:4px;min-height:100%;align-items:stretch}
+main {flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding:0}
+.panels{display:flex;flex-direction:column;gap:0;min-height:100%;align-items:stretch}
 .panel{width:100%;min-width:0;min-height:0;display:flex;flex-direction:column;flex:0 0 auto;background:#fff;border:0;border-radius:0;overflow:visible;box-shadow:none}
 .panel-body{width:100%;min-width:0;padding:0;background:transparent;min-height:calc(100dvh - 132px);flex:0 0 auto;display:flex;flex-direction:column}
 /* Every opened menu fills the same content area; each uses its own very-light pastel tint. */
@@ -522,7 +522,7 @@ function openSettings(){
  s.querySelectorAll('[data-visible]').forEach(el=>el.onchange=()=>{const id=el.dataset.visible;state.visible=el.checked?[...new Set([...state.visible,id])]:state.visible.filter(x=>x!==id);save();render();openSettings()});
  s.querySelectorAll('[data-up]').forEach(el=>el.onclick=()=>move(el.dataset.up,-1));s.querySelectorAll('[data-down]').forEach(el=>el.onclick=()=>move(el.dataset.down,1));
 }
-function move(id,d){let i=state.order.indexOf(id),j=i+d;if(j<0||j>=state.order.length)return;[state.order[i],state.order[j]]=[state.order[j],state.order[i]];save();openSettings()}
+function move(id,d){let i=state.order.indexOf(id),j=i+d;if(j<0||j>=state.order.length)return;[state.order[i],state.order[j]]=[state.order[j],state.order[i]];save();render()}
 document.querySelector('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeSheet()});
 const DATA_KEY='wn-quick-records-v1';let quickRecords=[];try{quickRecords=JSON.parse(localStorage.getItem(DATA_KEY)||'[]');if(!Array.isArray(quickRecords))quickRecords=[]}catch(e){}
 function persistQuick(){try{localStorage.setItem(DATA_KEY,JSON.stringify(quickRecords))}catch(e){}}
