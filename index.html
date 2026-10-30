@@ -464,7 +464,7 @@ function render(){
    const host=panels;
    if(node.parentNode!==host)host.append(node);
    node.classList.toggle('is-hidden',!state.opened.includes(id));
-   node.classList.toggle('collapsed',state.collapsed.includes(id));const ch=node.querySelector('.panel-chevron');if(ch)ch.textContent=state.collapsed.includes(id)?'＋':'−';
+   node.classList.toggle('collapsed',state.collapsed.includes(id));const ch=node.querySelector('.panel-chevron');if(ch)ch.textContent=state.collapsed.includes(id)?'＋':'−';bindQuickRecordActions(node);
    node.style.order=String(Math.max(0,order.indexOf(id)));
    if(state.opened.includes(id)&&!state.collapsed.includes(id)){
      const frame=node.querySelector('iframe');
