@@ -33,12 +33,8 @@ body {
 button,input,select {font:inherit;color:inherit}
 button {cursor:pointer}
 .app {
-  width:100%;
-  max-width:none;
-  margin:0 auto;
-  min-height:100dvh;
-  display:flex;
-  flex-direction:column;
+  width:100%;max-width:none;height:100dvh;min-height:0;margin:0 auto;
+  display:flex;flex-direction:column;overflow:hidden;
 }
 
 /* TOP BAR */
@@ -79,58 +75,15 @@ button {cursor:pointer}
 }
 
 /* MAIN PANELS */
-main {flex:1;padding:6px 8px 14px}
-.panels {
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-}
-.panel {
-  width:100%;
-  min-width:0;
-  background:transparent;
-  border:0;
-  border-bottom:1px solid var(--line);
-  border-radius:0;
-  overflow:visible;
-  box-shadow:none;
-}
-.panel-toolbar{display:flex;align-items:center;gap:6px;width:100%;background:#f2eee6;border-bottom:1px solid #e6ddd0;padding:0 2px;border-radius:10px}
-.panel-toolbar .panel-head{flex:1;min-width:0}
+main {flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:6px 8px 14px}
+.panels{display:flex;flex-direction:column;gap:9px}
+.panel{width:100%;min-width:0;min-height:calc(100dvh - 132px);display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.panel[data-panel="calendar"]{background:#F3F0E9;border-color:#E5E0D6}
+.panel-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:6px;width:100%;min-height:44px;background:transparent;padding:3px 7px;border-bottom:1px solid #e6ddd0}
 .panel-manage,.panel-add{flex:none;margin-right:2px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:7px 9px;font-size:12px;white-space:nowrap}.panel-add{width:42px;height:42px;padding:0;display:grid;place-items:center;background:#e7eee5;border-color:#cdd9ca;color:#47634a;font-size:27px;font-weight:700;line-height:1}.panel-manage{font-weight:650}
-.panel-head {
-  width:100%;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:9px 10px;
-  border:0;
-  background:transparent;
-  text-align:left;
-  font-weight:700;
-}
-.panel-head svg {width:21px;height:21px}
-.panel-head .chev {
-  margin-left:auto;
-  color:var(--muted);
-  transition:transform .15s;
-}
-.panel.collapsed .chev {transform:rotate(180deg)}
-.panel-body {
-  padding:0;
-  background:transparent;
-  border-top:0;
-  min-height:0;
-}
+.panel-body{padding:8px;background:transparent;min-height:0;flex:1;display:flex;flex-direction:column}
 /* Keep embedded documents mounted on mobile browsers while panels are folded. */
-.panel.collapsed .panel-body {
-  height:0;
-  min-height:0;
-  padding-top:0;
-  padding-bottom:0;
-  border-top:0;
-  overflow:hidden;
-}
+.panel.collapsed .panel-body{display:none}
 .panel.is-hidden {
   height:0 !important;
   min-height:0 !important;
@@ -141,8 +94,10 @@ main {flex:1;padding:6px 8px 14px}
   opacity:0;
   pointer-events:none;
 }
-.embedded-frame{display:block;width:100%;height:78vh;min-height:620px;border:0;border-radius:0;background:transparent}
-@media(max-width:699px){.embedded-frame{height:calc(100dvh - 430px);min-height:320px;max-height:520px}}
+.embedded-frame{display:block;width:100%;height:calc(100dvh - 160px);min-height:520px;flex:1;border:0;border-radius:0;background:transparent}
+@media(max-width:699px){.embedded-frame{height:calc(100dvh - 160px);min-height:calc(100dvh - 160px);max-height:none}}
+.panel[data-panel="shopping"] .embedded-frame{min-height:calc(100dvh - 205px);height:calc(100dvh - 205px)}
+.panel[data-panel="meal"] .embedded-frame{min-height:calc(100dvh - 160px);height:calc(100dvh - 160px)}
 
 .tabs {
   display:flex;
@@ -202,11 +157,11 @@ main {flex:1;padding:6px 8px 14px}
   place-items:center;
   padding:0;
 }
-.menu-btn.active {
-  background:#e7eee5;
-  border-color:#cdd9ca;
-  color:#47634a;
-}
+.menu-btn.active{background:#e7eee5;border-color:#cdd9ca;color:#47634a}
+.menu-btn[data-menu="calendar"].active{background:#F3F0E9;border-color:#E5E0D6;color:#756F64}
+.menu-btn[data-menu="map"].active{background:#E8EDF6;border-color:#D5DDEC;color:#52658B}
+.menu-btn[data-menu="shopping"].active{background:#F7F0DE;border-color:#E9DFC3;color:#786943}
+.menu-btn[data-menu="meal"].active{background:#E7EEE5;border-color:#CDD9CA;color:#47634A}
 .menu-btn svg {width:17px;height:17px}
 .utility-row {
   display:flex;
@@ -225,7 +180,11 @@ main {flex:1;padding:6px 8px 14px}
   color:var(--muted);
 }
 .utility-row .menu-btn svg {width:16px;height:16px}
-.utility-row .menu-btn.active {background:#e7eee5;color:#47634a}
+.utility-row .menu-btn.active{background:#e7eee5;color:#47634a}
+.utility-row .menu-btn[data-menu="calendar"].active{background:#F3F0E9;border-color:#E5E0D6;color:#756F64}
+.utility-row .menu-btn[data-menu="map"].active{background:#E8EDF6;border-color:#D5DDEC;color:#52658B}
+.utility-row .menu-btn[data-menu="shopping"].active{background:#F7F0DE;border-color:#E9DFC3;color:#786943}
+.utility-row .menu-btn[data-menu="meal"].active{background:#E7EEE5;border-color:#CDD9CA;color:#47634A}
 
 /* INLINE QUICK ACTIONS */
 .shopping-dock{display:none;padding:8px 12px 12px;background:var(--bg)}.shopping-dock.show{display:block}.shopping-dock .panel{display:block;margin:0;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}.shopping-dock .panel-toolbar{justify-content:stretch;gap:6px;padding:2px 4px;background:#fff}.shopping-dock .panel-head{display:flex;min-height:48px;padding:11px 12px;gap:9px}.shopping-dock .panel-head svg{width:20px;height:20px}.shopping-dock .panel-body{background:#fff;padding:0}.shopping-dock .panel.collapsed .panel-body{height:0;min-height:0;overflow:hidden}.shopping-dock iframe{display:block;width:100%;height:min(68dvh,620px);min-height:260px;border:0;border-radius:0;background:transparent}
@@ -472,12 +431,15 @@ function quickRecordsMarkup(id){
 function refreshQuickRecordPanels(){panelIds.forEach(id=>{const host=panelNodes[id]?.querySelector('[data-quick-records]');if(host)host.outerHTML=quickRecordsMarkup(id)})}
 function save(){try{localStorage.setItem('wn-preview-state',JSON.stringify(state))}catch(e){}}
 function createPanel(id){
- const m=menus.find(x=>x.id===id)||{id:'shopping',label:'Shopping List',symbol:'shopping'};const panelLabel=localizedMenuLabel(m.id,m.label);
- const p=document.createElement('article');p.className='panel';
- const head=document.createElement('button');head.className='panel-head';head.dataset.collapse=id;head.innerHTML=`${icon(m.symbol)}<span>${panelLabel}</span><span class="chev">⌃</span>`;
- const toolbar=document.createElement('div');toolbar.className='panel-toolbar';toolbar.append(head);
- if(id==='shopping'){const addItem=document.createElement('button');addItem.type='button';addItem.className='panel-add';addItem.textContent='＋';addItem.setAttribute('aria-label','아이템 추가');addItem.onclick=e=>{e.stopPropagation();const f=document.querySelector('#shoppingFrame');if(f?.contentWindow?.openShoppingItemEditor)f.contentWindow.openShoppingItemEditor(null);else toast('쇼핑리스트를 먼저 불러오는 중이에요')};const manage=document.createElement('button');manage.type='button';manage.className='panel-manage';manage.textContent='가게';manage.setAttribute('aria-label','가게 관리');manage.onclick=e=>{e.stopPropagation();const f=document.querySelector('#shoppingFrame');if(f?.contentWindow?.openStoreManager)f.contentWindow.openStoreManager();else toast('쇼핑리스트를 먼저 불러오는 중이에요')};toolbar.append(addItem,manage)}
+ const m=menus.find(x=>x.id===id)||{id:'shopping',label:'Shopping List',symbol:'shopping'};
+ const p=document.createElement('article');p.className='panel';p.dataset.panel=id;
  const body=document.createElement('div');body.className='panel-body';
+ if(id==='shopping'){
+   const toolbar=document.createElement('div');toolbar.className='panel-toolbar';
+   const addItem=document.createElement('button');addItem.type='button';addItem.className='panel-add';addItem.textContent='＋';addItem.setAttribute('aria-label','아이템 추가');addItem.onclick=e=>{e.stopPropagation();const f=document.querySelector('#shoppingFrame');if(f?.contentWindow?.openShoppingItemEditor)f.contentWindow.openShoppingItemEditor(null);else toast('쇼핑리스트를 먼저 불러오는 중이에요')};
+   const manage=document.createElement('button');manage.type='button';manage.className='panel-manage';manage.textContent='가게';manage.setAttribute('aria-label','가게 관리');manage.onclick=e=>{e.stopPropagation();const f=document.querySelector('#shoppingFrame');if(f?.contentWindow?.openStoreManager)f.contentWindow.openStoreManager();else toast('쇼핑리스트를 먼저 불러오는 중이에요')};
+   toolbar.append(addItem,manage);p.append(toolbar);
+ }
  if(id==='meal'){
    const quickHost=document.createElement('div');quickHost.innerHTML=quickRecordsMarkup('meal');body.append(quickHost.firstElementChild);
    const f=document.createElement('iframe');f.id='mealFrame';f.title='Meal Plan';f.className='embedded-frame';body.append(f);
@@ -491,19 +453,18 @@ function createPanel(id){
  else if(id==='check')body.innerHTML=quickRecordsMarkup('check')+'<div class="placeholder">Check 콘텐츠 영역</div>';
  else if(id==='someday'||id==='travel'||id==='scrapbook')body.innerHTML=quickRecordsMarkup(id)+'<div class="placeholder">'+m.label+' 콘텐츠 영역</div>';
  else body.innerHTML=`<div class="placeholder">${m.label} 콘텐츠 영역</div>`;
- p.append(toolbar,body);panelNodes[id]=p;return p;
+ p.append(body);panelNodes[id]=p;return p;
 }
 function render(){
  const order=state.sort==='fixed'?state.order.filter(id=>state.opened.includes(id)):state.opened.slice();
  panelIds.forEach(id=>{
    if(!panelNodes[id]&&state.opened.includes(id))createPanel(id);
    const node=panelNodes[id];if(!node)return;
-   const menuMeta=menus.find(x=>x.id===id);const heading=node.querySelector('.panel-head span:not(.chev)');if(heading)heading.textContent=localizedMenuLabel(id,menuMeta?.label||'Shopping List');
-   const host=id==='shopping'?shoppingDock:panels;
+   const host=panels;
    if(node.parentNode!==host)host.append(node);
    node.classList.toggle('is-hidden',!state.opened.includes(id));
    node.classList.toggle('collapsed',state.collapsed.includes(id));
-   if(id!=='shopping')node.style.order=String(Math.max(0,order.indexOf(id)));
+   node.style.order=String(Math.max(0,order.indexOf(id)));
    if(state.opened.includes(id)&&!state.collapsed.includes(id)){
      const frame=node.querySelector('iframe');
      if(frame&&frame.dataset.loaded==='true'){
@@ -514,12 +475,12 @@ function render(){
      }
    }
  });
- shoppingDock.classList.toggle('show',state.opened.includes('shopping'));
+ shoppingDock.classList.remove('show');
  mainMenus.innerHTML='';
- state.order.filter(id=>state.visible.includes(id)).forEach(id=>{const m=menus.find(x=>x.id===id);if(!m)return;const b=document.createElement('button');b.className='menu-btn'+(state.opened.includes(id)?' active':'');b.title=localizedMenuLabel(m.id,m.label);b.setAttribute('aria-label',localizedMenuLabel(m.id,m.label));b.innerHTML=icon(m.symbol);b.onclick=()=>toggleMenu(id);mainMenus.append(b)});
+ state.order.filter(id=>state.visible.includes(id)).forEach(id=>{const m=menus.find(x=>x.id===id);if(!m)return;const b=document.createElement('button');b.className='menu-btn'+(state.opened.includes(id)?' active':'');b.dataset.menu=id;b.title=localizedMenuLabel(m.id,m.label);b.setAttribute('aria-label',localizedMenuLabel(m.id,m.label));b.innerHTML=icon(m.symbol);b.onclick=()=>toggleMenu(id);mainMenus.append(b)});
  utilityMenus.innerHTML='';
- state.order.filter(id=>!state.visible.includes(id)).forEach(id=>{const m=menus.find(x=>x.id===id);if(!m)return;const b=document.createElement('button');b.className='menu-btn'+(state.opened.includes(id)?' active':'');b.title=m.label;b.setAttribute('aria-label',m.label);b.innerHTML=icon(m.symbol);b.onclick=()=>toggleMenu(id);utilityMenus.append(b)});
- utility.forEach(m=>{const b=document.createElement('button');b.className='menu-btn';b.title=localizedMenuLabel(m.id,m.label);b.setAttribute('aria-label',localizedMenuLabel(m.id,m.label));b.innerHTML=icon(m.symbol);b.onclick=()=>m.id==='settings'?openSettings():toast(m.label+' 미리보기');utilityMenus.append(b)});
+ state.order.filter(id=>!state.visible.includes(id)).forEach(id=>{const m=menus.find(x=>x.id===id);if(!m)return;const b=document.createElement('button');b.className='menu-btn'+(state.opened.includes(id)?' active':'');b.dataset.menu=id;b.title=m.label;b.setAttribute('aria-label',m.label);b.innerHTML=icon(m.symbol);b.onclick=()=>toggleMenu(id);utilityMenus.append(b)});
+ utility.forEach(m=>{const b=document.createElement('button');b.className='menu-btn';b.dataset.menu=m.id;b.title=localizedMenuLabel(m.id,m.label);b.setAttribute('aria-label',localizedMenuLabel(m.id,m.label));b.innerHTML=icon(m.symbol);b.onclick=()=>m.id==='settings'?openSettings():toast(m.label+' 미리보기');utilityMenus.append(b)});
  document.querySelectorAll('[data-collapse]').forEach(b=>{b.onclick=()=>{const id=b.dataset.collapse;state.collapsed=state.collapsed.includes(id)?state.collapsed.filter(x=>x!==id):[...state.collapsed,id];save();render()}});
  document.querySelector('[data-action="shopping"]').classList.toggle('active',state.opened.includes('shopping'));
 }
