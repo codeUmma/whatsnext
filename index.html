@@ -458,7 +458,7 @@ function quickRecordTypeForPanel(id){return ({check:'Check',calendar:'Calendar',
 function quickRecordsMarkup(id){
  const type=quickRecordTypeForPanel(id);if(!type)return '';
  const rows=quickRecords.filter(r=>r.type===type);
- const safe=v=>String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\"':'&quot;'}[c]));
+ const safe=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
  return rows.length?'<div class="quick-records" data-quick-records="'+id+'"><div class="quick-records-title">저장된 기록</div>'+rows.map(r=>'<div class="quick-record-card"><span>'+safe(r.title)+'</span><small>'+safe(new Date(r.createdAt).toLocaleDateString())+'</small></div>').join('')+'</div>':'<div class="quick-records" data-quick-records="'+id+'"></div>';
 }
 function refreshQuickRecordPanels(){panelIds.forEach(id=>{const host=panelNodes[id]?.querySelector('[data-quick-records]');if(host)host.outerHTML=quickRecordsMarkup(id)})}
