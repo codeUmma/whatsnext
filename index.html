@@ -180,52 +180,73 @@ main {flex:1;padding:14px 0 18px}
   position:sticky;
   bottom:0;
   background:var(--bg);
-  padding:10px 0 calc(8px + env(safe-area-inset-bottom));
+  padding:4px 5px calc(4px + env(safe-area-inset-bottom));
   border-top:1px solid var(--line);
   z-index:4;
 }
 .menu-grid {
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:6px;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:3px;
 }
 .menu-btn {
-  height:48px;
+  height:30px;
   min-width:0;
   border:1px solid transparent;
-  border-radius:13px;
+  border-radius:8px;
   background:#fff;
   display:grid;
   place-items:center;
+  padding:0;
 }
 .menu-btn.active {
   background:#e7eee5;
   border-color:#cdd9ca;
   color:#47634a;
 }
-.menu-btn svg {
-  width:22px;
-  height:22px;
-}
+.menu-btn svg {width:17px;height:17px}
 .utility-row {
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  gap:4px;
-  margin-top:8px;
-  padding-top:8px;
+  justify-content:space-around;
+  gap:3px;
+  margin-top:2px;
+  padding-top:2px;
   border-top:1px solid var(--line);
 }
 .utility-row .menu-btn {
-  height:42px;
+  height:27px;
   min-width:0;
   flex:1;
   background:transparent;
   color:var(--muted);
 }
-.utility-row .menu-btn.active {
-  background:#e7eee5;
-  color:#47634a;
+.utility-row .menu-btn svg {width:16px;height:16px}
+.utility-row .menu-btn.active {background:#e7eee5;color:#47634a}
+
+/* INLINE QUICK ACTIONS */
+.quick-dock {display:none;padding:9px 12px 11px;background:#fff;border-bottom:1px solid var(--line)}
+.quick-dock.show {display:block}
+.quick-dock-inner {display:grid;gap:8px}
+.quick-dock-title {font-size:13px;font-weight:750;color:var(--muted)}
+.quick-dock input,.quick-dock select {
+  width:100%;min-width:0;min-height:42px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:11px;background:#fff;
+  font-size:16px;
+}
+.quick-dock-actions {display:flex;gap:7px;align-items:center}
+.quick-dock-actions button {
+  min-height:36px;padding:7px 13px;border:1px solid var(--line);
+  border-radius:10px;background:#fff;font-size:13px
+}
+.quick-dock-actions .primary {background:#e7eee5;border-color:#cdd9ca;font-weight:700}
+.quick-results {display:grid;gap:0;max-height:34vh;overflow:auto}
+.quick-result {display:flex;justify-content:space-between;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line);font-size:13px}
+.quick-result small {color:var(--muted);white-space:nowrap}
+.action.listening {background:#fbe7e5;color:#a43c35}
+@media(min-width:700px) {
+  .menu-grid {grid-template-columns:repeat(12,minmax(0,1fr))}
+  .quick-dock {padding-left:18px;padding-right:18px}
 }
 
 /* POPUP */
@@ -305,7 +326,7 @@ main {flex:1;padding:14px 0 18px}
     align-items:start;
   }
   .panel {min-width:0}
-  .menu-grid {grid-template-columns:repeat(8,minmax(0,1fr))}
+  .menu-grid {grid-template-columns:repeat(12,minmax(0,1fr))}
 }
 @media(max-width:370px) {
   .brand {font-size:15px;letter-spacing:-.8px}
@@ -350,6 +371,8 @@ main {flex:1;padding:14px 0 18px}
     </svg>
   </button>
 </header>
+
+<section class="quick-dock" id="quickDock" aria-live="polite"></section>
 
 <main>
   <section class="panels" id="panels"></section>
@@ -494,12 +517,75 @@ function move(id,d){let i=state.order.indexOf(id),j=i+d;if(j<0||j>=state.order.l
 document.querySelector('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeSheet()});
 const DATA_KEY='wn-quick-records-v1';let quickRecords=[];try{quickRecords=JSON.parse(localStorage.getItem(DATA_KEY)||'[]');if(!Array.isArray(quickRecords))quickRecords=[]}catch(e){}
 function persistQuick(){try{localStorage.setItem(DATA_KEY,JSON.stringify(quickRecords))}catch(e){}}
-function quickAddSheet(){openSheet(`<button class="close" aria-label="닫기">×</button><h2>＋ 빠른 기록</h2><div class="sheet-row" style="display:block"><label style="width:100%">내용<input id="quickText" placeholder="생각난 내용을 바로 기록" style="width:100%;margin-top:6px"></label></div><div class="sheet-row"><label>종류 <select id="quickType"><option>Check</option><option>Calendar</option><option>Someday</option><option>Meal Plan</option><option>Travel</option><option>Scrapbook</option></select></label></div><button class="primary" id="quickSave">저장</button>`);const s=document.querySelector('#sheet');s.querySelector('.close').onclick=closeSheet;s.querySelector('#quickSave').onclick=()=>{const title=s.querySelector('#quickText').value.trim();if(!title)return;quickRecords.unshift({id:Date.now(),title,type:s.querySelector('#quickType').value,createdAt:new Date().toISOString()});persistQuick();closeSheet();toast('기록했어요')};s.querySelector('#quickText').focus()}
-function searchSheet(){openSheet(`<button class="close" aria-label="닫기">×</button><h2>통합 검색</h2><input id="globalSearch" placeholder="기록 검색" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:10px"><div id="globalResults"></div>`);const s=document.querySelector('#sheet');s.querySelector('.close').onclick=closeSheet;const inp=s.querySelector('#globalSearch'),out=s.querySelector('#globalResults');inp.oninput=()=>{const q=inp.value.trim().toLowerCase();let rows=quickRecords.map(r=>({title:r.title,type:r.type}));try{const md=JSON.parse(localStorage.getItem('whatsnext_mealplanner_v1')||'null');if(md&&Array.isArray(md.recipes))rows.push(...md.recipes.map(r=>({title:r.name||'',type:'Recipe'})))}catch(e){}try{const sd=JSON.parse(localStorage.getItem('wn-shopping-items-v3')||'[]');if(Array.isArray(sd))rows.push(...sd.map(r=>({title:r.name||'',type:'Shopping'})))}catch(e){}rows=rows.filter(r=>(r.title+' '+r.type).toLowerCase().includes(q));const safe=v=>String(v).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));out.innerHTML=q?(rows.length?rows.map(r=>`<div class="sheet-row"><span>${safe(r.title)}</span><small>${safe(r.type)}</small></div>`).join(''):'<p class="placeholder">검색 결과가 없어요.</p>'):''};inp.focus()}
+let quickMode='';
+let activeRecognition=null;
+const quickDock=document.querySelector('#quickDock');
+function closeQuickDock(){
+  if(activeRecognition){try{activeRecognition.stop()}catch(e){}activeRecognition=null}
+  quickMode='';quickDock.classList.remove('show');quickDock.innerHTML='';
+  document.querySelectorAll('.topbar [data-action]').forEach(b=>b.classList.remove('active','listening'));
+}
+function setQuickMode(mode){
+  if(quickMode===mode){closeQuickDock();return}
+  if(activeRecognition){try{activeRecognition.stop()}catch(e){}activeRecognition=null}
+  quickMode=mode;
+  document.querySelectorAll('.topbar [data-action]').forEach(b=>b.classList.toggle('active',b.dataset.action===mode));
+  quickDock.classList.add('show');
+  if(mode==='add'){
+    quickDock.innerHTML='<div class="quick-dock-inner"><div class="quick-dock-title">＋ 빠른 추가</div><input id="quickText" autocomplete="off" placeholder="생각난 내용을 입력하세요"><select id="quickType"><option>Check</option><option>Calendar</option><option>Someday</option><option>Meal Plan</option><option>Travel</option><option>Scrapbook</option></select><div class="quick-dock-actions"><button class="primary" id="quickSave">저장</button></div></div>';
+    document.querySelector('#quickSave').onclick=saveQuickRecord;
+  }else if(mode==='search'){
+    quickDock.innerHTML='<div class="quick-dock-inner"><div class="quick-dock-title">⌕ 통합 검색</div><input id="globalSearch" type="search" autocomplete="off" placeholder="기록·레시피·쇼핑 항목 검색"><div class="quick-results" id="globalResults"></div></div>';
+    document.querySelector('#globalSearch').oninput=runGlobalSearch;
+  }else if(mode==='voice'){
+    quickDock.innerHTML='<div class="quick-dock-inner"><div class="quick-dock-title" id="voiceStatus">🎙️ 말씀해 주세요</div><input id="quickText" autocomplete="off" placeholder="인식한 내용이 여기에 표시됩니다"><select id="quickType"><option>Check</option><option>Calendar</option><option>Someday</option><option>Meal Plan</option><option>Travel</option><option>Scrapbook</option></select><div class="quick-dock-actions"><button class="primary" id="voiceSave">저장</button><button id="voiceSearch">이 내용 검색</button><button id="voiceAgain">다시 말하기</button></div></div>';
+    document.querySelector('#voiceSave').onclick=saveQuickRecord;
+    document.querySelector('#voiceSearch').onclick=()=>{const q=document.querySelector('#quickText').value.trim();setQuickMode('search');const input=document.querySelector('#globalSearch');input.value=q;runGlobalSearch()};
+    document.querySelector('#voiceAgain').onclick=startVoiceRecognition;
+    startVoiceRecognition();
+  }
+  const input=quickDock.querySelector('input');
+  if(input){input.style.fontSize='16px';if(mode!=='voice')input.focus({preventScroll:true})}
+}
+function saveQuickRecord(){
+  const input=document.querySelector('#quickText'),title=input?.value.trim();if(!title){input?.focus({preventScroll:true});return}
+  const type=document.querySelector('#quickType')?.value||'Check';
+  quickRecords.unshift({id:Date.now(),title,type,createdAt:new Date().toISOString()});
+  persistQuick();closeQuickDock();toast('기록했어요');
+}
+function collectSearchRows(){
+  let rows=quickRecords.map(r=>({title:r.title,type:r.type}));
+  try{const md=JSON.parse(localStorage.getItem('whatsnext_mealplanner_v1')||'null');if(md&&Array.isArray(md.recipes))rows.push(...md.recipes.map(r=>({title:r.name||'',type:'Recipe'})))}catch(e){}
+  try{const sd=JSON.parse(localStorage.getItem('wn-shopping-items-v3')||'[]');if(Array.isArray(sd))rows.push(...sd.map(r=>({title:r.name||'',type:'Shopping'})))}catch(e){}
+  return rows;
+}
+function runGlobalSearch(){
+  const q=document.querySelector('#globalSearch')?.value.trim().toLowerCase()||'',out=document.querySelector('#globalResults');if(!out)return;
+  const rows=collectSearchRows().filter(r=>(r.title+' '+r.type).toLowerCase().includes(q));
+  const safe=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  out.innerHTML=q?(rows.length?rows.map(r=>'<div class="quick-result"><span>'+safe(r.title)+'</span><small>'+safe(r.type)+'</small></div>').join(''):'<div class="placeholder">검색 결과가 없어요.</div>'):'';
+}
+function startVoiceRecognition(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const status=document.querySelector('#voiceStatus'),input=document.querySelector('#quickText');
+  if(!SR){if(status)status.textContent='이 브라우저는 음성 인식을 지원하지 않아요. 아래에 직접 입력할 수 있어요.';toast('음성 인식은 Chrome 등 지원 브라우저에서 이용해 주세요');return}
+  if(activeRecognition){try{activeRecognition.stop()}catch(e){}}
+  const rec=new SR();activeRecognition=rec;rec.lang=appLanguage==='ko'?'ko-KR':'en-US';rec.continuous=false;rec.interimResults=true;
+  if(status)status.textContent='🔴 듣고 있어요…';
+  document.querySelector('[data-action="voice"]')?.classList.add('listening');
+  rec.onresult=e=>{
+    let transcript='';for(let i=e.resultIndex;i<e.results.length;i++)transcript+=e.results[i][0].transcript;
+    if(input)input.value=transcript;
+    if(status)status.textContent=e.results[e.results.length-1].isFinal?'내용을 확인하고 저장하거나 검색하세요':'듣고 있어요…';
+  };
+  rec.onerror=e=>{if(status)status.textContent=e.error==='not-allowed'?'마이크 권한을 허용해 주세요.':'음성을 인식하지 못했어요. 다시 말하거나 직접 입력해 주세요.';document.querySelector('[data-action="voice"]')?.classList.remove('listening');activeRecognition=null};
+  rec.onend=()=>{document.querySelector('[data-action="voice"]')?.classList.remove('listening');if(activeRecognition===rec)activeRecognition=null;if(status&&status.textContent==='🔴 듣고 있어요…')status.textContent='말씀이 끝났어요. 내용을 확인해 주세요.'};
+  try{rec.start()}catch(err){if(status)status.textContent='마이크를 시작할 수 없어요. 다시 눌러 주세요.';activeRecognition=null}
+}
 function flushShopping(){const f=window._shopFrame;if(!f||!f.contentWindow)return;const target=f.contentWindow;if(typeof target.addShoppingItem!=='function')return;const batch=pendingShopping.splice(0);batch.forEach(item=>target.addShoppingItem(item))}
 let pendingShopping=[];
 window.addEventListener('message',event=>{if(event.source!==document.querySelector('#mealFrame')?.contentWindow||event.data?.type!=='WN_MEAL_SHOPPING_ADD'||!Array.isArray(event.data.items))return;pendingShopping.push(...event.data.items);flushShopping();toast('재료를 쇼핑리스트로 보냈어요')});
-document.querySelectorAll('[data-action]').forEach(b=>{b.onclick=()=>{const a=b.dataset.action;if(a==='add')quickAddSheet();else if(a==='search')searchSheet();else if(a==='shopping')toggleMenu('shopping');else if(a==='voice'){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast('이 브라우저에서는 음성 입력을 지원하지 않아요');return}const rec=new SR();rec.lang=appLanguage==='ko'?'ko-KR':'en-US';rec.onresult=e=>{const value=e.results[0][0].transcript;quickAddSheet();setTimeout(()=>{const input=document.querySelector('#quickText');if(input)input.value=value},30)};rec.onerror=()=>toast('음성을 인식하지 못했어요');try{rec.start()}catch(err){toast('음성 입력을 시작하지 못했어요')}}}});
+document.querySelectorAll('[data-action]').forEach(b=>{b.onclick=()=>{const a=b.dataset.action;if(a==='add'||a==='search'||a==='voice')setQuickMode(a);else if(a==='shopping')toggleMenu('shopping')}});
 render();
 </script>
 </body>
