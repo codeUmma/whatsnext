@@ -424,7 +424,7 @@ let appLanguage='ko';try{appLanguage=localStorage.getItem('wn-preview-language')
 function localizedMenuLabel(id,fallback){const labels={en:{check:'Check',meal:'Meal Plan',calendar:'Calendar',map:'Map',someday:'Someday',benefits:'Cards & Benefits',travel:'Travel',scrapbook:'Scrapbook',gallery:'Art Gallery',database:'Database',settings:'Settings'},ko:{check:'체크',meal:'식단',calendar:'캘린더',map:'지도',someday:'언젠가',benefits:'카드 혜택',travel:'여행',scrapbook:'스크랩북',gallery:'아트 갤러리',database:'데이터베이스',settings:'설정'}};return (labels[appLanguage]||labels.ko)[id]||fallback;}
 const panels=document.querySelector('#panels'),mainMenus=document.querySelector('#mainMenus'),utilityMenus=document.querySelector('#utilityMenus'),shoppingDock=document.querySelector('#shoppingDock');
 const panelNodes=Object.create(null),panelIds=['shopping',...menus.map(m=>m.id)];
-function quickRecordTypeForPanel(id){return ({check:'Check',calendar:'Calendar',someday:'Someday',meal:'Meal Plan',travel:'Travel',scrapbook:'Scrapbook'})[id]||''}
+function quickRecordTypeForPanel(id){return ({check:'Check',calendar:'Calendar',someday:'Someday',meal:'Meal Plan',shopping:'Shopping',travel:'Travel',scrapbook:'Scrapbook'})[id]||''}
 function quickRecordsMarkup(id){
  const type=quickRecordTypeForPanel(id);if(!type)return '';
  const rows=quickRecords.filter(r=>r.type===type||(id==='check'&&r.type==='임시 보관함'));
@@ -457,6 +457,7 @@ function createPanel(id){
    f.addEventListener('load',()=>{f.dataset.loaded='true';try{f.contentWindow.postMessage({type:'WN_APP_LANGUAGE',language:appLanguage},'*');f.contentWindow.setPage('planner');f.contentWindow.scrollTo(0,0)}catch(e){}});
    f.srcdoc=prepareFrameHTML(MEAL_HTML);
  }else if(id==='shopping'){
+   const quickHost=document.createElement('div');quickHost.innerHTML=quickRecordsMarkup('shopping');body.append(quickHost.firstElementChild);
    const f=document.createElement('iframe');f.id='shoppingFrame';f.title='Shopping List';f.className='embedded-frame';f.style.background='#f7f1e8';body.append(f);
    f.addEventListener('load',()=>{f.dataset.loaded='true';window._shopFrame=f;f.contentWindow.postMessage({type:'WN_APP_LANGUAGE',language:appLanguage},'*');flushShopping()});window._shopFrame=f;f.srcdoc=prepareFrameHTML(SHOP_HTML);
  }else if(id==='calendar')body.innerHTML='<div class="tabs"><button class="tab active">Month</button><button class="tab">Week</button><button class="tab">Weekend</button><button class="tab">Ideas</button></div>'+quickRecordsMarkup('calendar')+'<div class="placeholder">캘린더 콘텐츠 영역</div>';
@@ -536,8 +537,8 @@ const quickDock=document.querySelector('#quickDock');
 function saveQuickDraft(){
   const input=quickDock.querySelector('#quickText'),title=input?.value?.trim();if(!title)return;
   const editId=Number(input.dataset.editId||0),old=quickRecords.find(r=>r.id===editId);
-  if(old){old.title=title;old.updatedAt=new Date().toISOString()}
-  else quickRecords.unshift({id:Date.now(),title,type:'임시 보관함',createdAt:new Date().toISOString()});
+  if(old){old.title=title;old.type=document.querySelector('#quickType')?.value||old.type;old.updatedAt=new Date().toISOString()}
+  else quickRecords.unshift({id:Date.now(),title,type:document.querySelector('#quickType')?.value||'임시 보관함',createdAt:new Date().toISOString()});
   persistQuick();refreshQuickRecordPanels();
   if(input){input.value='';delete input.dataset.editId}
   renderQuickInbox();
@@ -561,7 +562,7 @@ function setQuickMode(mode){
   document.querySelectorAll('.topbar [data-action]').forEach(b=>b.classList.toggle('action-active',b.dataset.action===mode));
   quickDock.classList.add('show');
   if(mode==='add'){
-    quickDock.innerHTML='<div class="quick-dock-inner"><input id="quickText" autocomplete="off" placeholder="생각난 내용…"><div class="quick-dock-actions"><button class="primary" id="quickSave">＋</button></div><div id="quickInbox" class="quick-inbox"></div></div>';
+    quickDock.innerHTML='<div class="quick-dock-inner"><input id="quickText" autocomplete="off" placeholder="생각난 내용…"><select id="quickType" aria-label="저장 위치"><option value="임시 보관함">임시 보관함</option><option value="Check">Check</option><option value="Calendar">Calendar</option><option value="Shopping">Shopping List</option><option value="Meal Plan">Meal Plan</option><option value="Someday">Someday</option><option value="Travel">Travel</option><option value="Scrapbook">Scrapbook</option></select><div class="quick-dock-actions"><button class="primary" id="quickSave">＋</button></div><div id="quickInbox" class="quick-inbox"></div></div>';
     document.querySelector('#quickSave').onclick=saveQuickRecord;renderQuickInbox();
   }else if(mode==='search'){
     quickDock.innerHTML='<div class="quick-dock-inner"><input id="globalSearch" type="search" autocomplete="off" placeholder="검색…"><div class="quick-results" id="globalResults"></div></div>';
