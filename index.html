@@ -447,9 +447,14 @@ const defaults={visible:menus.map(m=>m.id),opened:['meal','shopping'],collapsed:
 let state={...defaults};
 try{const saved=JSON.parse(localStorage.getItem('wn-preview-state')||'null');if(saved)state={...state,...saved}}catch(e){}
 state.visible=Array.isArray(state.visible)?state.visible:defaults.visible.slice();
+state.visible=state.visible.filter((id,i,a)=>menus.some(m=>m.id===id)&&a.indexOf(id)===i);
 state.opened=Array.isArray(state.opened)?state.opened:defaults.opened.slice();
+state.opened=state.opened.filter((id,i,a)=>(id==='shopping'||menus.some(m=>m.id===id))&&a.indexOf(id)===i);
 state.collapsed=Array.isArray(state.collapsed)?state.collapsed:[];
+state.collapsed=state.collapsed.filter((id,i,a)=>(id==='shopping'||menus.some(m=>m.id===id))&&a.indexOf(id)===i);
 state.order=Array.isArray(state.order)?state.order:defaults.order.slice();
+state.order=state.order.filter((id,i,a)=>menus.some(m=>m.id===id)&&a.indexOf(id)===i);
+menus.forEach(m=>{if(!state.order.includes(m.id))state.order.push(m.id)});
 let appLanguage='ko';try{appLanguage=localStorage.getItem('wn-preview-language')||'ko'}catch(e){}
 const panels=document.querySelector('#panels'),mainMenus=document.querySelector('#mainMenus'),utilityMenus=document.querySelector('#utilityMenus'),shoppingDock=document.querySelector('#shoppingDock');
 const panelNodes=Object.create(null),panelIds=['shopping',...menus.map(m=>m.id)];
