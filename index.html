@@ -74,15 +74,12 @@ button {cursor:pointer}
   stroke:currentColor;
 }
 
-/* MAIN PANELS — full-width, flush panels; no extra title-row spacing */
-main {flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 4px 8px}
-.panels{display:flex;flex-direction:column;gap:4px}
-.panel{width:100%;min-width:0;min-height:0;display:flex;flex-direction:column;background:#fff;border:0;border-radius:0;overflow:hidden;box-shadow:none}
-.panel-head{height:44px;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 12px;background:#E7EEE5;border-bottom:1px solid #CDD9CA;font-size:14px;font-weight:800;cursor:pointer;user-select:none}.panel-head svg{width:19px;height:19px;flex:0 0 19px}.panel-head .panel-chevron{margin-left:auto;font-size:17px;font-weight:500}.panel[data-panel="calendar"] .panel-head{background:#F3F0E9;border-color:#E5E0D6;color:#756F64}.panel[data-panel="map"] .panel-head{background:#E8EDF6;border-color:#D5DDEC;color:#52658B}.panel[data-panel="shopping"] .panel-head{background:#F7F0DE;border-color:#E9DFC3;color:#786943}
-.panel[data-panel="calendar"]{background:#F3F0E9}
-.panel-body{padding:0;background:transparent;min-height:calc(100dvh - 180px);flex:1;display:flex;flex-direction:column}
-/* Keep embedded documents mounted on mobile browsers while panels are folded. */
-.panel.collapsed .panel-body{display:none}
+/* MAIN PANELS — compact, consistent full-height sections */
+main {flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding:0 4px 8px}
+.panels{display:flex;flex-direction:column;gap:4px;min-height:100%;align-items:stretch}
+.panel{width:100%;min-width:0;min-height:0;display:flex;flex-direction:column;flex:0 0 auto;background:#fff;border:0;border-radius:0;overflow:visible;box-shadow:none}
+.panel-body{width:100%;min-width:0;padding:0;background:transparent;min-height:calc(100dvh - 132px);flex:0 0 auto;display:flex;flex-direction:column}
+.panel[data-panel="calendar"] .panel-body{background:#F3F0E9}
 .panel.is-hidden {
   height:0 !important;
   min-height:0 !important;
@@ -93,9 +90,7 @@ main {flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 
   opacity:0;
   pointer-events:none;
 }
-.embedded-frame{display:block;width:100%;height:calc(100dvh - 180px);min-height:420px;flex:1 1 auto;border:0;border-radius:0;background:transparent}
-.panel[data-panel="shopping"] .embedded-frame,
-.panel[data-panel="meal"] .embedded-frame{height:calc(100dvh - 180px);min-height:420px;flex:1 1 auto}
+.embedded-frame{display:block;width:100%;height:calc(100dvh - 132px);min-height:0;flex:0 0 auto;border:0;border-radius:0;background:transparent}
 
 .tabs {
   display:flex;
@@ -131,65 +126,26 @@ main {flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 
   font-size:14px;
 }
 
-/* BOTTOM MENUS */
-.bottom {
-  position:sticky;
-  bottom:0;
-  background:var(--bg);
-  padding:4px 5px calc(4px + env(safe-area-inset-bottom));
-  border-top:1px solid var(--line);
-  z-index:4;
-}
-.menu-grid {
-  display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:3px;
-}
-.menu-btn {
-  height:30px;
-  min-width:0;
-  border:1px solid transparent;
-  border-radius:8px;
-  background:#fff;
-  display:grid;
-  place-items:center;
-  padding:0;
-}
-.menu-btn.active{background:#cfe2cb;border:2px solid #6f946c;color:#294f30;box-shadow:inset 0 0 0 1px #fff,0 2px 6px #456b4530}
-.menu-btn[data-menu="calendar"].active{background:#F3F0E9;border-color:#E5E0D6;color:#756F64}
-.menu-btn[data-menu="map"].active{background:#E8EDF6;border-color:#D5DDEC;color:#52658B}
-.menu-btn[data-menu="shopping"].active{background:#F7F0DE;border-color:#E9DFC3;color:#786943}
-.menu-btn[data-menu="meal"].active{background:#E7EEE5;border-color:#CDD9CA;color:#47634A}
-.menu-btn svg {width:17px;height:17px}
-.utility-row {
-  display:flex;
-  align-items:center;
-  justify-content:space-around;
-  gap:3px;
-  margin-top:2px;
-  padding-top:2px;
-  border-top:1px solid var(--line);
-}
-.utility-row .menu-btn {
-  height:27px;
-  min-width:0;
-  flex:1;
-  background:transparent;
-  color:var(--muted);
-}
-.utility-row .menu-btn svg {width:16px;height:16px}
-.utility-row .menu-btn.active{background:#e7eee5;color:#47634a}
-.utility-row .menu-btn[data-menu="calendar"].active{background:#F3F0E9;border-color:#E5E0D6;color:#756F64}
-.utility-row .menu-btn[data-menu="map"].active{background:#E8EDF6;border-color:#D5DDEC;color:#52658B}
-.utility-row .menu-btn[data-menu="shopping"].active{background:#F7F0DE;border-color:#E9DFC3;color:#786943}
-.utility-row .menu-btn[data-menu="meal"].active{background:#E7EEE5;border-color:#CDD9CA;color:#47634A}
-/* Persistent menu colors: green by default, gray calendar, blue map */
-.bottom .menu-btn{background:#E7EEE5!important;border:1px solid #B9CEB6!important;color:#365B3A!important}.bottom .menu-btn[data-menu="shopping"]{background:#F7F0DE!important;border-color:#E4D6B5!important;color:#75602F!important}
-.bottom .menu-btn[data-menu="calendar"]{background:#F3F0E9;border-color:#E5E0D6;color:#756F64}
-.bottom .menu-btn[data-menu="map"]{background:#E8EDF6;border-color:#D5DDEC;color:#52658B}
-.bottom .menu-btn.active{background:#BFD8B9!important;border:2px solid #527D50!important;color:#244B2B!important;box-shadow:inset 0 0 0 1px #fff,0 2px 7px #456b4540!important;transform:translateY(-1px)}
-.bottom .menu-btn[data-menu="calendar"].active{background:#D8D2C6!important;border-color:#817969!important;color:#4F493F!important}
-.bottom .menu-btn[data-menu="map"].active{background:#C5D7F0!important;border-color:#627FAE!important;color:#304D7D!important}
+/* BOTTOM MENUS — inactive is neutral; color marks an opened section */
+.bottom{position:sticky;bottom:0;background:var(--bg);padding:4px 5px calc(4px + env(safe-area-inset-bottom));border-top:1px solid var(--line);z-index:4}
+.menu-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}
+.menu-btn{height:30px;min-width:0;flex:1;border:1px solid #E7E1D9;border-radius:8px;background:#FFFEFC;color:#827B72;display:grid;place-items:center;padding:0;box-shadow:none;transform:none}
+.menu-btn svg{width:17px;height:17px}
+.menu-btn.active{background:#E7EEE5;border:2px solid #AFC4AA;color:#47634A;box-shadow:inset 0 0 0 1px #fff}
+.menu-btn[data-menu="check"].active,.menu-btn[data-menu="meal"].active,.menu-btn[data-menu="someday"].active{background:#E7EEE5;border-color:#AFC4AA;color:#47634A}
+.menu-btn[data-menu="calendar"].active{background:#F3F0E9;border-color:#CFC8BA;color:#756F64}
+.menu-btn[data-menu="map"].active{background:#E8EDF6;border-color:#B9C9E2;color:#52658B}
+.menu-btn[data-menu="shopping"].active{background:#F7F0DE;border-color:#E4D6B5;color:#786943}
+.menu-btn[data-menu="travel"].active{background:#F1EAF6;border-color:#D4C2E2;color:#705786}
+.menu-btn[data-menu="scrapbook"].active{background:#F8EAF0;border-color:#E8C9D6;color:#88596D}
+.menu-btn[data-menu="benefits"].active{background:#E8F1F3;border-color:#BED6DC;color:#4F737D}
+.utility-row{display:flex;align-items:center;justify-content:space-around;gap:3px;margin-top:2px;padding-top:2px;border-top:1px solid var(--line)}
+.utility-row .menu-btn{height:27px;min-width:0;flex:1;background:#FFFEFC;color:#827B72}
+.utility-row .menu-btn svg{width:16px;height:16px}
+.utility-row .menu-btn.active{background:#F1EAF6;border:2px solid #D4C2E2;color:#705786}
+.utility-row .menu-btn[data-menu="gallery"].active{background:#F8EAF0;border-color:#E8C9D6;color:#88596D}
+.utility-row .menu-btn[data-menu="database"].active{background:#E8F1F3;border-color:#BED6DC;color:#4F737D}
+.utility-row .menu-btn[data-menu="settings"].active{background:#EEECE8;border-color:#D1CDC4;color:#68645C}
 
 /* INLINE QUICK ACTIONS */
 .shopping-dock{display:none;padding:8px 12px 12px;background:var(--bg)}.shopping-dock.show{display:block}.shopping-dock .panel{display:block;margin:0;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}.shopping-dock .panel-toolbar{justify-content:stretch;gap:6px;padding:2px 4px;background:#fff}.shopping-dock .panel-head{display:flex;min-height:48px;padding:11px 12px;gap:9px}.shopping-dock .panel-head svg{width:20px;height:20px}.shopping-dock .panel-body{background:#fff;padding:0}.shopping-dock .panel.collapsed .panel-body{height:0;min-height:0;overflow:hidden}.shopping-dock iframe{display:block;width:100%;height:min(68dvh,620px);min-height:260px;border:0;border-radius:0;background:transparent}
@@ -440,7 +396,6 @@ function save(){try{localStorage.setItem('wn-preview-state',JSON.stringify(state
 function createPanel(id){
  const m=menus.find(x=>x.id===id)||{id:'shopping',label:'Shopping List',symbol:'shopping'};
  const p=document.createElement('article');p.className='panel';p.dataset.panel=id;
- const head=document.createElement('div');head.className='panel-head';head.innerHTML=icon(m.symbol)+'<span>'+localizedMenuLabel(id,m.label)+'</span><span class="panel-chevron">'+(state.collapsed.includes(id)?'＋':'−')+'</span>';head.onclick=()=>{state.collapsed=state.collapsed.includes(id)?state.collapsed.filter(x=>x!==id):[...state.collapsed,id];save();render()};
  const body=document.createElement('div');body.className='panel-body';
  if(id==='meal'){
    const quickHost=document.createElement('div');quickHost.innerHTML=quickRecordsMarkup('meal');body.append(quickHost.firstElementChild);
@@ -455,7 +410,7 @@ function createPanel(id){
  else if(id==='check')body.innerHTML=quickRecordsMarkup('check')+'<div class="placeholder">Check 콘텐츠 영역</div>';
  else if(id==='someday'||id==='travel'||id==='scrapbook')body.innerHTML=quickRecordsMarkup(id)+'<div class="placeholder">'+m.label+' 콘텐츠 영역</div>';
  else body.innerHTML=`<div class="placeholder">${m.label} 콘텐츠 영역</div>`;
- p.append(head,body);panelNodes[id]=p;return p;
+ p.append(body);panelNodes[id]=p;return p;
 }
 function render(){
  const order=state.sort==='fixed'?state.order.filter(id=>state.opened.includes(id)):state.opened.slice();
@@ -465,7 +420,7 @@ function render(){
    const host=panels;
    if(node.parentNode!==host)host.append(node);
    node.classList.toggle('is-hidden',!state.opened.includes(id));
-   node.classList.toggle('collapsed',state.collapsed.includes(id));const ch=node.querySelector('.panel-chevron');if(ch)ch.textContent=state.collapsed.includes(id)?'＋':'−';bindQuickRecordActions(node);
+   node.classList.remove('collapsed');bindQuickRecordActions(node);
    node.style.order=String(Math.max(0,order.indexOf(id)));
    if(state.opened.includes(id)&&!state.collapsed.includes(id)){
      const frame=node.querySelector('iframe');
@@ -486,7 +441,21 @@ function render(){
  document.querySelectorAll('[data-collapse]').forEach(b=>{b.onclick=()=>{const id=b.dataset.collapse;state.collapsed=state.collapsed.includes(id)?state.collapsed.filter(x=>x!==id):[...state.collapsed,id];save();render()}});
  document.querySelector('[data-action="shopping"]').classList.toggle('active',state.opened.includes('shopping'));
 }
-function toggleMenu(id){if(state.opened.includes(id)){state.opened=state.opened.filter(x=>x!==id);state.collapsed=state.collapsed.filter(x=>x!==id)}else state.opened.push(id);save();render();if(id==='meal'&&state.opened.includes('meal')){const f=document.querySelector('#mealFrame');try{if(f?.contentWindow?.setPage)f.contentWindow.setPage('planner');if(f?.contentWindow)f.contentWindow.scrollTo(0,0)}catch(e){}}}
+function toggleMenu(id){
+ const opening=!state.opened.includes(id);
+ if(!opening){state.opened=state.opened.filter(x=>x!==id);state.collapsed=state.collapsed.filter(x=>x!==id)}
+ else{state.opened.push(id);state.collapsed=state.collapsed.filter(x=>x!==id)}
+ save();render();
+ if(opening){
+   requestAnimationFrame(()=>requestAnimationFrame(()=>{
+     const main=document.querySelector('main'),node=panelNodes[id];
+     if(!main||!node)return;
+     const y=node.getBoundingClientRect().top-main.getBoundingClientRect().top+main.scrollTop;
+     main.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+   }));
+ }
+ if(id==='meal'&&opening){const f=document.querySelector('#mealFrame');try{if(f?.contentWindow?.setPage)f.contentWindow.setPage('planner');if(f?.contentWindow)f.contentWindow.scrollTo(0,0)}catch(e){}}
+}
 function toast(s){const t=document.querySelector('#toast');t.textContent=s;t.classList.add('show');clearTimeout(window._toastTimer);window._toastTimer=setTimeout(()=>t.classList.remove('show'),1600)}
 function closeSheet(){document.querySelector('#overlay').classList.remove('show')}
 function openSheet(html){const s=document.querySelector('#sheet');s.innerHTML=html;document.querySelector('#overlay').classList.add('show')}
