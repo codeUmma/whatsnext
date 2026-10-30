@@ -91,19 +91,19 @@ main {flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-be
 .panel{width:100%;min-width:0;min-height:0;display:flex;flex-direction:column;flex:0 0 auto;background:#fff;border:0;border-radius:0;overflow:visible;box-shadow:none}
 .panel-body{width:100%;min-width:0;padding:0 5px;background:transparent;min-height:calc(100dvh - 132px);flex:0 0 auto;display:flex;flex-direction:column}
 /* Every opened menu fills the same content area; each uses its own very-light pastel tint. */
-.panel[data-panel="check"] .panel-body{background:#FFE9E6}
-.panel[data-panel="meal"] .panel-body{background:#FFF5EC}
-.panel[data-panel="calendar"] .panel-body{background:#F3F0E8}
-.panel[data-panel="map"] .panel-body{background:#EEF4FC}
-.panel[data-panel="someday"] .panel-body{background:#FFF8DF}
-.panel[data-panel="benefits"] .panel-body{background:#EAF6EF}
-.panel[data-panel="travel"] .panel-body{background:#F2ECFA}
-.panel[data-panel="scrapbook"] .panel-body{background:#FBEAF1}
-.panel[data-panel="gallery"] .panel-body{background:#F0EDFA}
-.panel[data-panel="database"] .panel-body{background:#EDF4E8}
-.panel[data-panel="settings"] .panel-body{background:#F0F1F3}
-.panel[data-panel="shopping"] .panel-body{background:#F8F0DC}
-.panel[data-panel="shopping"] .embedded-frame{background:#F8F0DC}
+.panel[data-panel="check"] .panel-body{background:#FFF1EF}
+.panel[data-panel="meal"] .panel-body{background:#FFFAF5}
+.panel[data-panel="calendar"] .panel-body{background:#FAF9F5}
+.panel[data-panel="map"] .panel-body{background:#F6F9FF}
+.panel[data-panel="someday"] .panel-body{background:#FFFCED}
+.panel[data-panel="benefits"] .panel-body{background:#F4FBF5}
+.panel[data-panel="travel"] .panel-body{background:#FAF7FF}
+.panel[data-panel="scrapbook"] .panel-body{background:#FFF5F8}
+.panel[data-panel="gallery"] .panel-body{background:#F4F2FF}
+.panel[data-panel="database"] .panel-body{background:#F5FAF1}
+.panel[data-panel="settings"] .panel-body{background:#F8F9FA}
+.panel[data-panel="shopping"] .panel-body{background:#FCF8EE}
+.panel[data-panel="shopping"] .embedded-frame{background:#FCF8EE}
 .panel[data-panel="check"]{--panel-accent:#C96F68}.panel[data-panel="meal"]{--panel-accent:#D98A5B}.panel[data-panel="calendar"]{--panel-accent:#9B927D}.panel[data-panel="map"]{--panel-accent:#83A8D4}.panel[data-panel="someday"]{--panel-accent:#D6B85D}.panel[data-panel="benefits"]{--panel-accent:#79AD8B}.panel[data-panel="travel"]{--panel-accent:#A28AC8}.panel[data-panel="scrapbook"]{--panel-accent:#D68EAA}.panel[data-panel="gallery"]{--panel-accent:#9B88C8}.panel[data-panel="database"]{--panel-accent:#91A97E}.panel[data-panel="settings"]{--panel-accent:#929AA5}.panel[data-panel="shopping"]{--panel-accent:#B59B5D}
 .panel-body button,.panel-body .tab,.panel-body .chip{ -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none }
 .panel-body button:focus{outline-color:var(--panel-accent,#b7a3e5)}
@@ -160,19 +160,19 @@ main {flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-be
 .menu-btn{height:30px;min-width:0;flex:1;border:1px solid #E7E1D9;border-radius:8px;background:#FFFEFC;color:#827B72;display:grid;place-items:center;padding:0;box-shadow:none;transform:none}
 .menu-btn svg{width:17px;height:17px}
 .menu-btn.active{background:#E7EEE5;border:2px solid #AFC4AA;color:#47634A;box-shadow:inset 0 0 0 1px #fff}
-.menu-btn[data-menu="check"].active{background:#FBE3E0;border-color:#D99A94;color:#9B4F49}.menu-btn[data-menu="meal"].active{background:#FFF0E3;border-color:#E8B58F;color:#9A633E}.menu-btn[data-menu="someday"].active{background:#FFF8DF;border-color:#E4D28D;color:#88702F}
-.menu-btn[data-menu="calendar"].active{background:#F3F0E9;border-color:#CFC8BA;color:#756F64}
-.menu-btn[data-menu="map"].active{background:#E8EDF6;border-color:#B9C9E2;color:#52658B}
-.menu-btn[data-menu="shopping"].active{background:#F7F0DE;border-color:#E4D6B5;color:#786943}
-.menu-btn[data-menu="travel"].active{background:#F1EAF6;border-color:#D4C2E2;color:#705786}
-.menu-btn[data-menu="scrapbook"].active{background:#F8EAF0;border-color:#E8C9D6;color:#88596D}.menu-btn[data-menu="gallery"].active{background:#F0EDFA;border-color:#C9BDE8;color:#66558F}
-.menu-btn[data-menu="benefits"].active{background:#E8F1F3;border-color:#BED6DC;color:#4F737D}
+.menu-btn[data-menu="check"].active{background:#F7D7D3;border-color:#D88780;color:#91443E}.menu-btn[data-menu="meal"].active{background:#FBE7D7;border-color:#DFA477;color:#92562F}.menu-btn[data-menu="someday"].active{background:#F8EFCB;border-color:#D9C16F;color:#806625}
+.menu-btn[data-menu="calendar"].active{background:#EAE6DC;border-color:#C2B9A7;color:#6D6558}
+.menu-btn[data-menu="map"].active{background:#DCE7F7;border-color:#A8BCDE;color:#465B83}
+.menu-btn[data-menu="shopping"].active{background:#F0E5C9;border-color:#D9C79A;color:#705E35}
+.menu-btn[data-menu="travel"].active{background:#E8DDF3;border-color:#C5AFE0;color:#654B80}
+.menu-btn[data-menu="scrapbook"].active{background:#F5DDE7;border-color:#DFAFC3;color:#80485F}.menu-btn[data-menu="gallery"].active{background:#E5E0F8;border-color:#B9ABE0;color:#594782}
+.menu-btn[data-menu="benefits"].active{background:#DCECEF;border-color:#AFCFD6;color:#426B76}.menu-btn[data-menu="database"].active{background:#DCEAF7;border-color:#B0CBE6;color:#496987}
 .utility-row{display:flex;align-items:center;justify-content:space-around;gap:3px;margin-top:2px;padding-top:2px;border-top:1px solid var(--line)}
 .utility-row .menu-btn{height:27px;min-width:0;flex:1;background:#FFFEFC;color:#827B72}
 .utility-row .menu-btn svg{width:16px;height:16px}
 .utility-row .menu-btn.active{background:#F1EAF6;border:2px solid #D4C2E2;color:#705786}
-.utility-row .menu-btn[data-menu="gallery"].active{background:#F0EDFA;border-color:#C9BDE8;color:#66558F}
-.utility-row .menu-btn[data-menu="database"].active{background:#E8F1F3;border-color:#BED6DC;color:#4F737D}
+.utility-row .menu-btn[data-menu="gallery"].active{background:#E5E0F8;border-color:#B9ABE0;color:#594782}
+.utility-row .menu-btn[data-menu="database"].active{background:#DCEAF7;border-color:#B0CBE6;color:#496987}
 .utility-row .menu-btn[data-menu="settings"].active{background:#EEECE8;border-color:#D1CDC4;color:#68645C}
 
 /* UNIQUE SECTION COLORS — each menu has its own visual identity */
