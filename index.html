@@ -536,9 +536,21 @@ function persistQuick(){try{localStorage.setItem(DATA_KEY,JSON.stringify(quickRe
 let quickMode='';
 let activeRecognition=null;
 const quickDock=document.querySelector('#quickDock');
+function classifyQuickType(text){
+  const v=String(text||'').toLowerCase();
+  if(/trader joe|trader joes|costco|whole foods|korean market|장보기|살 것|사야 할|구매|쇼핑리스트|shopping list/.test(v))return 'Shopping';
+  if(/비행기|항공|호텔|여행|여행가|체크인|체크아웃|숙소|여행 계획|trip|flight|hotel|vacation/.test(v))return 'Travel';
+  if(/레시피|재료|만드는 법|조리|굽기|볶기|recipe|ingredients|bake|cook/.test(v))return 'Meal Plan';
+  if(/매주|매일|매월|반복|오전|오후|\d{1,2}[:시]\s*\d{0,2}|\d{1,2}\/\d{1,2}|일정|예약|appointment|calendar|schedule/.test(v))return 'Calendar';
+  if(/언젠가|나중에|언젠가는|커서|미래에|somday|someday|later someday/.test(v))return 'Someday';
+  if(/확인해야|확인하기|마감|취소|신청|제출|챙겨야|기한|due|confirm|deadline|cancel/.test(v))return 'Check';
+  if(/https?:\/\/|인스타|유튜브|참고|저장해|스크랩|inspiration|save this/.test(v))return 'Scrapbook';
+  return '임시 보관함';
+}
+function resolveQuickType(value,title){return !value||value==='자동'?classifyQuickType(title):value}
 function saveQuickDraft(){
   const input=quickDock.querySelector('#quickText'),title=input?.value?.trim();if(!title)return;
-  const type=document.querySelector('#quickType')?.value||'임시 보관함';
+  const type=resolveQuickType(document.querySelector('#quickType')?.value,title);
   const editId=Number(input.dataset.editId||0),old=quickRecords.find(r=>r.id===editId);
   if(old){old.title=title;old.type=type;old.updatedAt=new Date().toISOString()}
   else quickRecords.unshift({id:Date.now(),title,type,createdAt:new Date().toISOString()});
@@ -565,13 +577,13 @@ function setQuickMode(mode){
   document.querySelectorAll('.topbar [data-action]').forEach(b=>b.classList.toggle('action-active',b.dataset.action===mode));
   quickDock.classList.add('show');
   if(mode==='add'){
-    quickDock.innerHTML='<div class="quick-dock-inner"><textarea id="quickText" rows="2" autocomplete="off" placeholder="생각난 내용… 여러 줄로 붙여넣어도 돼요"></textarea><select id="quickType" aria-label="저장 위치"><option value="임시 보관함">자동 분류 · 임시 보관함</option><option value="Check">Check</option><option value="Calendar">Calendar</option><option value="Shopping">Shopping List</option><option value="Meal Plan">Meal Plan</option><option value="Someday">Someday</option><option value="Travel">Travel</option><option value="Scrapbook">Scrapbook</option></select><div class="quick-dock-actions"><button class="primary" id="quickSave">＋ 저장</button></div><div id="quickInbox" class="quick-inbox"></div></div>';
+    quickDock.innerHTML='<div class="quick-dock-inner"><textarea id="quickText" rows="2" autocomplete="off" placeholder="생각난 내용… 여러 줄로 붙여넣어도 돼요"></textarea><select id="quickType" aria-label="저장 위치"><option value="자동">자동 분류</option><option value="Check">Check</option><option value="Calendar">Calendar</option><option value="Shopping">Shopping List</option><option value="Meal Plan">Meal Plan</option><option value="Someday">Someday</option><option value="Travel">Travel</option><option value="Scrapbook">Scrapbook</option></select><div class="quick-dock-actions"><button class="primary" id="quickSave">＋ 저장</button></div><div id="quickInbox" class="quick-inbox"></div></div>';
     document.querySelector('#quickSave').onclick=saveQuickRecord;renderQuickInbox();
   }else if(mode==='search'){
     quickDock.innerHTML='<div class="quick-dock-inner"><input id="globalSearch" type="search" autocomplete="off" placeholder="검색…"><div class="quick-results" id="globalResults"></div></div>';
     document.querySelector('#globalSearch').oninput=runGlobalSearch;
   }else if(mode==='voice'){
-    quickDock.innerHTML='<div class="quick-dock-inner"><textarea id="quickText" rows="2" autocomplete="off" placeholder="음성 입력 내용…"></textarea><select id="quickType" aria-label="저장 위치"><option value="임시 보관함">자동 분류 · 임시 보관함</option><option value="Check">Check</option><option value="Calendar">Calendar</option><option value="Shopping">Shopping List</option><option value="Meal Plan">Meal Plan</option><option value="Someday">Someday</option><option value="Travel">Travel</option><option value="Scrapbook">Scrapbook</option></select><div class="quick-dock-actions"><button class="primary" id="voiceSave">＋ 저장</button><button id="voiceSearch">⌕</button><button id="voiceAgain">↻</button></div><span id="voiceStatus" class="quick-dock-title">듣고 있어요…</span></div>';
+    quickDock.innerHTML='<div class="quick-dock-inner"><textarea id="quickText" rows="2" autocomplete="off" placeholder="음성 입력 내용…"></textarea><select id="quickType" aria-label="저장 위치"><option value="자동">자동 분류</option><option value="Check">Check</option><option value="Calendar">Calendar</option><option value="Shopping">Shopping List</option><option value="Meal Plan">Meal Plan</option><option value="Someday">Someday</option><option value="Travel">Travel</option><option value="Scrapbook">Scrapbook</option></select><div class="quick-dock-actions"><button class="primary" id="voiceSave">＋ 저장</button><button id="voiceSearch">⌕</button><button id="voiceAgain">↻</button></div><span id="voiceStatus" class="quick-dock-title">듣고 있어요…</span></div>';
     document.querySelector('#voiceSave').onclick=saveQuickRecord;
     document.querySelector('#voiceSearch').onclick=()=>{const q=document.querySelector('#quickText').value.trim();setQuickMode('search');const input=document.querySelector('#globalSearch');input.value=q;runGlobalSearch()};
     document.querySelector('#voiceAgain').onclick=startVoiceRecognition;
@@ -582,7 +594,7 @@ function setQuickMode(mode){
 }
 function saveQuickRecord(){
   const input=document.querySelector('#quickText'),title=input?.value.trim();if(!title){input?.focus({preventScroll:true});return}
-  const type=document.querySelector('#quickType')?.value||'임시 보관함';
+  const type=resolveQuickType(document.querySelector('#quickType')?.value,title);
   const editId=Number(input.dataset.editId||0),old=quickRecords.find(r=>r.id===editId);
   if(old){old.title=title;old.type=type;old.updatedAt=new Date().toISOString()}
   else quickRecords.unshift({id:Date.now(),title,type,createdAt:new Date().toISOString()});
