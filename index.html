@@ -225,6 +225,7 @@ main {flex:1;padding:14px 0 18px}
 .utility-row .menu-btn.active {background:#e7eee5;color:#47634a}
 
 /* INLINE QUICK ACTIONS */
+.shopping-dock{display:none;padding:4px 8px 8px;background:#fff;border-bottom:1px solid var(--line)}.shopping-dock.show{display:block}.shopping-dock .panel{display:block}.shopping-dock .panel-head{display:none}.shopping-dock .panel-toolbar{justify-content:flex-end;padding:3px 4px 7px}.shopping-dock iframe{display:block;width:100%;height:min(68dvh,620px);min-height:260px;border:0;background:#fffaf3}
 .quick-dock {display:none;padding:9px 12px 11px;background:#fff;border-bottom:1px solid var(--line)}
 .quick-dock.show {display:block}
 .quick-dock-inner {display:grid;gap:8px}
@@ -380,6 +381,7 @@ main {flex:1;padding:14px 0 18px}
 </header>
 
 <section class="quick-dock" id="quickDock" aria-live="polite"></section>
+<section class="shopping-dock" id="shoppingDock" aria-label="Shopping List"></section>
 
 <main>
   <section class="panels" id="panels"></section>
@@ -414,7 +416,6 @@ const SHOP_HTML="<!doctype html>\n<html lang=\"ko\">\n<head>\n<meta charset=\"ut
 const menus = [
   {id:'check',label:'Check',symbol:'check-circle'},
   {id:'meal',label:'Meal Plan',symbol:'utensils'},
-  {id:'shopping',label:'Shopping List',symbol:'shopping'},
   {id:'calendar',label:'Calendar',symbol:'calendar'},
   {id:'map',label:'Map',symbol:'map'},
   {id:'someday',label:'Someday',symbol:'lightbulb'},
@@ -449,11 +450,9 @@ state.visible=Array.isArray(state.visible)?state.visible:defaults.visible.slice(
 state.opened=Array.isArray(state.opened)?state.opened:defaults.opened.slice();
 state.collapsed=Array.isArray(state.collapsed)?state.collapsed:[];
 state.order=Array.isArray(state.order)?state.order:defaults.order.slice();
-if(!state.visible.includes('shopping'))state.visible.push('shopping');
-if(!state.order.includes('shopping'))state.order.splice(Math.max(0,state.order.indexOf('meal')+1),0,'shopping');
 let appLanguage='ko';try{appLanguage=localStorage.getItem('wn-preview-language')||'ko'}catch(e){}
-const panels=document.querySelector('#panels'),mainMenus=document.querySelector('#mainMenus'),utilityMenus=document.querySelector('#utilityMenus');
-const panelNodes=Object.create(null),panelIds=menus.map(m=>m.id);
+const panels=document.querySelector('#panels'),mainMenus=document.querySelector('#mainMenus'),utilityMenus=document.querySelector('#utilityMenus'),shoppingDock=document.querySelector('#shoppingDock');
+const panelNodes=Object.create(null),panelIds=['shopping',...menus.map(m=>m.id)];
 function quickRecordTypeForPanel(id){return ({check:'Check',calendar:'Calendar',someday:'Someday',meal:'Meal Plan',travel:'Travel',scrapbook:'Scrapbook'})[id]||''}
 function quickRecordsMarkup(id){
  const type=quickRecordTypeForPanel(id);if(!type)return '';
@@ -490,9 +489,11 @@ function render(){
  panelIds.forEach(id=>{
    if(!panelNodes[id]&&state.opened.includes(id))createPanel(id);
    const node=panelNodes[id];if(!node)return;
-   if(node.parentNode!==panels)panels.append(node); // append only once; never detach iframe on collapse/reopen
+   const host=id==='shopping'?shoppingDock:panels;
+   if(node.parentNode!==host)host.append(node);
    node.classList.toggle('is-hidden',!state.opened.includes(id));
    node.classList.toggle('collapsed',state.collapsed.includes(id));
+   if(id!=='shopping')node.style.order=String(Math.max(0,order.indexOf(id)));
    if(state.opened.includes(id)&&!state.collapsed.includes(id)){
      const frame=node.querySelector('iframe');
      if(frame&&frame.dataset.loaded==='true'){
@@ -502,12 +503,12 @@ function render(){
        }catch(e){}
      }
    }
-   node.style.order=String(Math.max(0,order.indexOf(id)));
  });
+ shoppingDock.classList.toggle('show',state.opened.includes('shopping'));
  mainMenus.innerHTML='';
  state.order.filter(id=>state.visible.includes(id)).forEach(id=>{const m=menus.find(x=>x.id===id);if(!m)return;const b=document.createElement('button');b.className='menu-btn'+(state.opened.includes(id)?' active':'');b.title=m.label;b.setAttribute('aria-label',m.label);b.innerHTML=icon(m.symbol);b.onclick=()=>toggleMenu(id);mainMenus.append(b)});
  utilityMenus.innerHTML='';
- state.order.filter(id=>!state.visible.includes(id)).forEach(id=>{const m=menus.find(x=>x.id===id);if(!m)return;const b=document.createElement('button');b.className='menu-btn';b.title=m.label;b.innerHTML=icon(m.symbol);b.onclick=()=>{state.visible.push(id);state.opened=state.opened.filter(x=>x!==id);save();render()};utilityMenus.append(b)});
+ state.order.filter(id=>!state.visible.includes(id)).forEach(id=>{const m=menus.find(x=>x.id===id);if(!m)return;const b=document.createElement('button');b.className='menu-btn'+(state.opened.includes(id)?' active':'');b.title=m.label;b.setAttribute('aria-label',m.label);b.innerHTML=icon(m.symbol);b.onclick=()=>toggleMenu(id);utilityMenus.append(b)});
  utility.forEach(m=>{const b=document.createElement('button');b.className='menu-btn';b.title=m.label;b.innerHTML=icon(m.symbol);b.onclick=()=>m.id==='settings'?openSettings():toast(m.label+' 미리보기');utilityMenus.append(b)});
  document.querySelectorAll('[data-collapse]').forEach(b=>{b.onclick=()=>{const id=b.dataset.collapse;state.collapsed=state.collapsed.includes(id)?state.collapsed.filter(x=>x!==id):[...state.collapsed,id];save();render()}});
  document.querySelector('[data-action="shopping"]').classList.toggle('active',state.opened.includes('shopping'));
@@ -537,25 +538,43 @@ function persistQuick(){try{localStorage.setItem(DATA_KEY,JSON.stringify(quickRe
 let quickMode='';
 let activeRecognition=null;
 const quickDock=document.querySelector('#quickDock');
+function saveQuickDraft(){
+  const input=quickDock.querySelector('#quickText'),title=input?.value?.trim();if(!title)return;
+  const editId=Number(input.dataset.editId||0),old=quickRecords.find(r=>r.id===editId);
+  if(old){old.title=title;old.updatedAt=new Date().toISOString()}
+  else quickRecords.unshift({id:Date.now(),title,type:'임시 보관함',createdAt:new Date().toISOString()});
+  persistQuick();refreshQuickRecordPanels();
+  if(input){input.value='';delete input.dataset.editId}
+  renderQuickInbox();
+}
+function renderQuickInbox(){
+  const host=document.querySelector('#quickInbox');if(!host)return;
+  const rows=quickRecords.filter(r=>r.type==='임시 보관함');
+  const safe=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  host.innerHTML=rows.map(r=>'<button type="button" class="quick-record-card" data-draft-id="'+r.id+'"><span>'+safe(r.title)+'</span><small>수정</small></button>').join('');
+  host.querySelectorAll('[data-draft-id]').forEach(b=>b.onclick=()=>{const r=quickRecords.find(x=>x.id===Number(b.dataset.draftId)),input=document.querySelector('#quickText');if(r&&input){input.value=r.title;input.dataset.editId=r.id;input.focus({preventScroll:true})}});
+}
 function closeQuickDock(){
+  if(quickMode==='add'||quickMode==='voice')saveQuickDraft();
   if(activeRecognition){try{activeRecognition.stop()}catch(e){}activeRecognition=null}
   quickMode='';quickDock.classList.remove('show');quickDock.innerHTML='';
   document.querySelectorAll('.topbar [data-action]').forEach(b=>b.classList.remove('active','listening'));
 }
 function setQuickMode(mode){
   if(quickMode===mode){closeQuickDock();return}
+  if(quickMode==='add'||quickMode==='voice')saveQuickDraft();
   if(activeRecognition){try{activeRecognition.stop()}catch(e){}activeRecognition=null}
   quickMode=mode;
   document.querySelectorAll('.topbar [data-action]').forEach(b=>b.classList.toggle('active',b.dataset.action===mode));
   quickDock.classList.add('show');
   if(mode==='add'){
-    quickDock.innerHTML='<div class="quick-dock-inner"><div class="quick-dock-title">＋ 빠른 추가</div><input id="quickText" autocomplete="off" placeholder="생각난 내용을 입력하세요"><select id="quickType"><option>Check</option><option>Calendar</option><option>Someday</option><option>Meal Plan</option><option>Travel</option><option>Scrapbook</option></select><div class="quick-dock-actions"><button class="primary" id="quickSave">저장</button></div></div>';
-    document.querySelector('#quickSave').onclick=saveQuickRecord;
+    quickDock.innerHTML='<div class="quick-dock-inner"><input id="quickText" autocomplete="off" placeholder="생각난 내용…"><div class="quick-dock-actions"><button class="primary" id="quickSave">＋</button></div><div id="quickInbox" class="quick-inbox"></div></div>';
+    document.querySelector('#quickSave').onclick=saveQuickRecord;renderQuickInbox();
   }else if(mode==='search'){
-    quickDock.innerHTML='<div class="quick-dock-inner"><div class="quick-dock-title">⌕ 통합 검색</div><input id="globalSearch" type="search" autocomplete="off" placeholder="기록·레시피·쇼핑 항목 검색"><div class="quick-results" id="globalResults"></div></div>';
+    quickDock.innerHTML='<div class="quick-dock-inner"><input id="globalSearch" type="search" autocomplete="off" placeholder="검색…"><div class="quick-results" id="globalResults"></div></div>';
     document.querySelector('#globalSearch').oninput=runGlobalSearch;
   }else if(mode==='voice'){
-    quickDock.innerHTML='<div class="quick-dock-inner"><div class="quick-dock-title" id="voiceStatus">🎙️ 말씀해 주세요</div><input id="quickText" autocomplete="off" placeholder="인식한 내용이 여기에 표시됩니다"><select id="quickType"><option>Check</option><option>Calendar</option><option>Someday</option><option>Meal Plan</option><option>Travel</option><option>Scrapbook</option></select><div class="quick-dock-actions"><button class="primary" id="voiceSave">저장</button><button id="voiceSearch">이 내용 검색</button><button id="voiceAgain">다시 말하기</button></div></div>';
+    quickDock.innerHTML='<div class="quick-dock-inner"><input id="quickText" autocomplete="off" placeholder="음성 입력 내용…"><div class="quick-dock-actions"><button class="primary" id="voiceSave">＋</button><button id="voiceSearch">⌕</button><button id="voiceAgain">↻</button></div><span id="voiceStatus" class="quick-dock-title">듣고 있어요…</span></div>';
     document.querySelector('#voiceSave').onclick=saveQuickRecord;
     document.querySelector('#voiceSearch').onclick=()=>{const q=document.querySelector('#quickText').value.trim();setQuickMode('search');const input=document.querySelector('#globalSearch');input.value=q;runGlobalSearch()};
     document.querySelector('#voiceAgain').onclick=startVoiceRecognition;
@@ -566,9 +585,10 @@ function setQuickMode(mode){
 }
 function saveQuickRecord(){
   const input=document.querySelector('#quickText'),title=input?.value.trim();if(!title){input?.focus({preventScroll:true});return}
-  const type=document.querySelector('#quickType')?.value||'Check';
-  quickRecords.unshift({id:Date.now(),title,type,createdAt:new Date().toISOString()});
-  persistQuick();refreshQuickRecordPanels();closeQuickDock();toast('기록했어요');
+  const editId=Number(input.dataset.editId||0),old=quickRecords.find(r=>r.id===editId);
+  if(old){old.title=title;old.updatedAt=new Date().toISOString()}
+  else quickRecords.unshift({id:Date.now(),title,type:'임시 보관함',createdAt:new Date().toISOString()});
+  persistQuick();refreshQuickRecordPanels();if(input){input.value='';delete input.dataset.editId}closeQuickDock();toast('임시 보관했어요');
 }
 function collectSearchRows(){
   let rows=quickRecords.map(r=>({title:r.title,type:r.type}));
@@ -602,7 +622,9 @@ function startVoiceRecognition(){
 function flushShopping(){const f=window._shopFrame;if(!f||!f.contentWindow)return;const target=f.contentWindow;if(typeof target.addShoppingItem!=='function')return;const batch=pendingShopping.splice(0);batch.forEach(item=>target.addShoppingItem(item))}
 let pendingShopping=[];
 window.addEventListener('message',event=>{if(event.source!==document.querySelector('#mealFrame')?.contentWindow||event.data?.type!=='WN_MEAL_SHOPPING_ADD'||!Array.isArray(event.data.items))return;pendingShopping.push(...event.data.items);flushShopping();toast('재료를 쇼핑리스트로 보냈어요')});
-document.querySelectorAll('[data-action]').forEach(b=>{b.onclick=()=>{const a=b.dataset.action;if(a==='add'||a==='search'||a==='voice')setQuickMode(a);else if(a==='shopping'){closeQuickDock();toggleMenu('shopping')}}});
+function toggleShoppingDock(){closeQuickDock();toggleMenu('shopping')}
+window.addEventListener('pagehide',saveQuickDraft);
+document.querySelectorAll('[data-action]').forEach(b=>{b.onclick=()=>{const a=b.dataset.action;if(a==='add'||a==='search'||a==='voice')setQuickMode(a);else if(a==='shopping')toggleShoppingDock()}});
 render();
 </script>
 </body>
