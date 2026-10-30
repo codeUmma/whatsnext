@@ -68,6 +68,17 @@ button {cursor:pointer}
   place-items:center;
 }
 .action:active,.menu-btn:active {background:#eee7dc}
+.action.action-active{border:1.5px solid #D2C2E5}
+.action[data-action="voice"].action-active{background:#F0EAF7;border-color:#D2C2E5;color:#70568A}
+.action[data-action="add"].action-active{background:#E7EEE5;border-color:#AFC4AA;color:#47634A}
+.action[data-action="search"].action-active{background:#E8EDF6;border-color:#B9C9E2;color:#52658B}
+.action[data-action="shopping"].action-active{background:#F7F0DE;border-color:#E4D6B5;color:#786943}
+.settings-panel,.database-trash{padding:14px;border-radius:14px;background:#fff;border:1px solid #e9e1d7}
+.settings-panel h3,.database-trash h3{margin:0 0 12px;font-size:17px}
+.settings-line{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid #eee8df;font-size:14px}
+.settings-line select{max-width:55%;padding:7px;border:1px solid #ddd4c8;border-radius:8px;background:#fff}
+.settings-subtitle{font-weight:700;margin:16px 0 4px}
+.settings-line button{border:1px solid #ddd4c8;border-radius:8px;background:#fff;padding:5px 10px}
 .action svg {
   width:23px;
   height:23px;
@@ -359,13 +370,12 @@ const menus = [
   {id:'someday',label:'Someday',symbol:'lightbulb'},
   {id:'benefits',label:'Cards & Benefits',symbol:'credit-card'},
   {id:'travel',label:'Travel',symbol:'plane'},
-  {id:'scrapbook',label:'Scrapbook',symbol:'bookmark'}
-];
-const utility = [
+  {id:'scrapbook',label:'Scrapbook',symbol:'bookmark'},
   {id:'gallery',label:'Art Gallery',symbol:'image'},
   {id:'database',label:'Database',symbol:'database'},
   {id:'settings',label:'Settings',symbol:'settings'}
 ];
+const utility = [];
 const paths = {
 'check-circle':'<circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>',
 utensils:'<path d="M7 2v8M4 2v5a3 3 0 0 0 6 0V2M7 10v12M17 2v20M17 2c3 2 3 7 0 9"/>',
@@ -407,6 +417,19 @@ function quickRecordsMarkup(id){
 function bindQuickRecordActions(root=document){root.querySelectorAll('[data-qaction]').forEach(b=>{if(b.dataset.bound)return;b.dataset.bound='1';b.onclick=e=>{e.stopPropagation();const id=Number(b.dataset.id),a=b.dataset.qaction;if(a==='delete')deleteQuickRecord(id);else sendQuickRecordToMeal(id,a)}})}
 function refreshQuickRecordPanels(){panelIds.forEach(id=>{const host=panelNodes[id]?.querySelector('[data-quick-records]');if(host)host.outerHTML=quickRecordsMarkup(id)});bindQuickRecordActions(document)}
 function save(){try{localStorage.setItem('wn-preview-state',JSON.stringify(state))}catch(e){}}
+function settingsPanelMarkup(){return `<div class="settings-panel"><h3>⚙️ Settings</h3>
+ <label class="settings-line">열린 메뉴 순서 <select id="panelSort"><option value="fixed">내가 정한 순서</option><option value="click">누른 순서</option></select></label>
+ <label class="settings-line">언어 <select id="panelLanguage"><option value="ko">한국어</option><option value="en">English</option></select></label>
+ <div class="settings-subtitle">메뉴 표시 및 순서</div>
+ ${state.order.map(id=>{const m=menus.find(x=>x.id===id);return m?`<div class="settings-line"><label><input type="checkbox" data-panel-visible="${id}" ${state.visible.includes(id)?'checked':''}> ${m.label}</label><span><button type="button" data-panel-up="${id}">↑</button><button type="button" data-panel-down="${id}">↓</button></span></div>`:''}).join('')}
+ <div class="settings-line"><span>가게별 관리</span><button type="button" id="panelStoreManager">가게 관리</button></div></div>`}
+function bindSettingsPanel(){const root=panelNodes.settings;if(!root)return;const sort=root.querySelector('#panelSort'),lang=root.querySelector('#panelLanguage');
+ if(sort){sort.value=state.sort;sort.onchange=()=>{state.sort=sort.value;save();render()}}
+ if(lang){lang.value=appLanguage;lang.onchange=()=>{appLanguage=lang.value;try{localStorage.setItem('wn-preview-language',appLanguage)}catch(e){};['mealFrame','shoppingFrame'].forEach(id=>document.getElementById(id)?.contentWindow?.postMessage({type:'WN_APP_LANGUAGE',language:appLanguage},'*'));toast('언어 설정 저장')}}
+ root.querySelector('#panelStoreManager')?.addEventListener('click',()=>{const f=document.querySelector('#shoppingFrame');if(f?.contentWindow)f.contentWindow.postMessage({type:'WN_OPEN_STORE_MANAGER'},'*');else toast('Shopping List를 먼저 열어 주세요')});
+ root.querySelectorAll('[data-panel-visible]').forEach(el=>el.onchange=()=>{const id=el.dataset.panelVisible;state.visible=el.checked?[...new Set([...state.visible,id])]:state.visible.filter(x=>x!==id);save();render()});
+ root.querySelectorAll('[data-panel-up]').forEach(el=>el.onclick=()=>move(el.dataset.panelUp,-1));root.querySelectorAll('[data-panel-down]').forEach(el=>el.onclick=()=>move(el.dataset.panelDown,1));
+}
 function createPanel(id){
  const m=menus.find(x=>x.id===id)||{id:'shopping',label:'Shopping List',symbol:'shopping'};
  const p=document.createElement('article');p.className='panel';p.dataset.panel=id;
@@ -423,6 +446,9 @@ function createPanel(id){
  else if(id==='map')body.innerHTML='<div class="map-placeholder">지도 및 장소 콘텐츠 영역</div>';
  else if(id==='check')body.innerHTML=quickRecordsMarkup('check')+'<div class="placeholder">Check 콘텐츠 영역</div>';
  else if(id==='someday'||id==='travel'||id==='scrapbook')body.innerHTML=quickRecordsMarkup(id)+'<div class="placeholder">'+m.label+' 콘텐츠 영역</div>';
+ else if(id==='gallery')body.innerHTML='<div class="placeholder">🧡 아트갤러리 콘텐츠 영역</div>';
+ else if(id==='database')body.innerHTML='<div class="database-trash"><h3>🗑️ 휴지통</h3><div id="trashContents">삭제한 항목을 보관합니다.</div></div>';
+ else if(id==='settings')body.innerHTML=settingsPanelMarkup();
  else body.innerHTML=`<div class="placeholder">${m.label} 콘텐츠 영역</div>`;
  p.append(body);panelNodes[id]=p;return p;
 }
@@ -451,9 +477,10 @@ function render(){
  state.order.filter(id=>state.visible.includes(id)).forEach(id=>{const m=menus.find(x=>x.id===id);if(!m)return;const b=document.createElement('button');b.className='menu-btn'+(state.opened.includes(id)?' active':'');b.dataset.menu=id;b.title=localizedMenuLabel(m.id,m.label);b.setAttribute('aria-label',localizedMenuLabel(m.id,m.label));b.innerHTML=icon(m.symbol);b.onclick=()=>toggleMenu(id);mainMenus.append(b)});
  utilityMenus.innerHTML='';
  state.order.filter(id=>!state.visible.includes(id)).forEach(id=>{const m=menus.find(x=>x.id===id);if(!m)return;const b=document.createElement('button');b.className='menu-btn'+(state.opened.includes(id)?' active':'');b.dataset.menu=id;b.title=m.label;b.setAttribute('aria-label',m.label);b.innerHTML=icon(m.symbol);b.onclick=()=>toggleMenu(id);utilityMenus.append(b)});
- utility.forEach(m=>{const b=document.createElement('button');b.className='menu-btn';b.dataset.menu=m.id;b.title=localizedMenuLabel(m.id,m.label);b.setAttribute('aria-label',localizedMenuLabel(m.id,m.label));b.innerHTML=icon(m.symbol);b.onclick=()=>m.id==='settings'?openSettings():toast(m.label+' 미리보기');utilityMenus.append(b)});
+ utility.forEach(m=>{const b=document.createElement('button');b.className='menu-btn';b.dataset.menu=m.id;b.title=localizedMenuLabel(m.id,m.label);b.setAttribute('aria-label',localizedMenuLabel(m.id,m.label));b.innerHTML=icon(m.symbol);b.onclick=()=>toggleMenu(m.id);utilityMenus.append(b)});
  document.querySelectorAll('[data-collapse]').forEach(b=>{b.onclick=()=>{const id=b.dataset.collapse;state.collapsed=state.collapsed.includes(id)?state.collapsed.filter(x=>x!==id):[...state.collapsed,id];save();render()}});
  document.querySelector('[data-action="shopping"]').classList.toggle('active',state.opened.includes('shopping'));
+ bindSettingsPanel();
 }
 function toggleMenu(id){
  const opening=!state.opened.includes(id);
@@ -467,6 +494,7 @@ function toast(s){const t=document.querySelector('#toast');t.textContent=s;t.cla
 function closeSheet(){document.querySelector('#overlay').classList.remove('show')}
 function openSheet(html){const s=document.querySelector('#sheet');s.innerHTML=html;document.querySelector('#overlay').classList.add('show')}
 function openSettings(){
+ toggleMenu('settings');return;
  openSheet(`<h2>Settings</h2>
  <div class="sheet-row"><span>열린 메뉴 표시 순서</span><select id="sort"><option value="fixed">내가 정한 메뉴 순서</option><option value="click">누른 순서</option></select></div>
  <div class="sheet-row"><span>레이아웃</span><select id="layout"><option value="B">아이콘 버튼형</option><option value="A">드롭다운형</option></select></div>
@@ -574,7 +602,8 @@ let pendingShopping=[];
 window.addEventListener('message',event=>{if(event.source!==document.querySelector('#mealFrame')?.contentWindow||event.data?.type!=='WN_MEAL_SHOPPING_ADD'||!Array.isArray(event.data.items))return;pendingShopping.push(...event.data.items);flushShopping();toast('재료를 쇼핑리스트로 보냈어요')});
 function toggleShoppingDock(){closeQuickDock();toggleMenu('shopping')}
 
-document.querySelectorAll('[data-action]').forEach(b=>{b.onclick=()=>{const a=b.dataset.action;if(a==='add'||a==='search'||a==='voice')setQuickMode(a);else if(a==='shopping')toggleShoppingDock()}});
+const actionColors={voice:'#F0EAF7',add:'#E7EEE5',search:'#E8EDF6',shopping:'#F7F0DE'};
+document.querySelectorAll('[data-action]').forEach(b=>{b.onclick=()=>{const a=b.dataset.action;if(a==='add'||a==='search'||a==='voice'){document.querySelectorAll('[data-action]').forEach(x=>x.classList.remove('action-active'));b.classList.add('action-active');setQuickMode(a)}else if(a==='shopping'){b.classList.toggle('action-active');toggleShoppingDock()}}});
 render();
 </script>
 </body>
