@@ -71,6 +71,7 @@ button {cursor:pointer}
 .action.action-active{border:1.5px solid #D2C2E5}
 .action[data-action="voice"].action-active{background:#F0EAF7;border-color:#D2C2E5;color:#70568A}
 .action[data-action="add"].action-active{background:#E7EEE5;border-color:#AFC4AA;color:#47634A}
+.action[data-action="search"].action-active{background:#E8EDF6;border:1.5px solid #B9C9E2;color:#52658B}
 .action[data-action="search"].action-active{background:#E8EDF6;border-color:#B9C9E2;color:#52658B}
 .action[data-action="shopping"].action-active{background:#F7F0DE;border-color:#E4D6B5;color:#786943}
 .settings-panel,.database-trash{padding:14px;border-radius:14px;background:#fff;border:1px solid #e9e1d7}
@@ -195,6 +196,7 @@ main {flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-be
 .quick-dock.show {display:block}
 .quick-dock-inner {display:grid;gap:8px}
 .quick-dock-title {font-size:13px;font-weight:750;color:var(--muted)}
+.quick-dock textarea{width:100%;min-width:0;min-height:48px;max-height:55dvh;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:#fff;font:inherit;font-size:16px;line-height:1.45;resize:none;overflow-y:auto}
 .quick-dock input,.quick-dock select {
   width:100%;min-width:0;min-height:42px;padding:10px 12px;
   border:1px solid var(--line);border-radius:11px;background:#fff;
@@ -536,12 +538,13 @@ let activeRecognition=null;
 const quickDock=document.querySelector('#quickDock');
 function saveQuickDraft(){
   const input=quickDock.querySelector('#quickText'),title=input?.value?.trim();if(!title)return;
+  const type=document.querySelector('#quickType')?.value||'임시 보관함';
   const editId=Number(input.dataset.editId||0),old=quickRecords.find(r=>r.id===editId);
-  if(old){old.title=title;old.type=document.querySelector('#quickType')?.value||old.type;old.updatedAt=new Date().toISOString()}
-  else quickRecords.unshift({id:Date.now(),title,type:document.querySelector('#quickType')?.value||'임시 보관함',createdAt:new Date().toISOString()});
+  if(old){old.title=title;old.type=type;old.updatedAt=new Date().toISOString()}
+  else quickRecords.unshift({id:Date.now(),title,type,createdAt:new Date().toISOString()});
   persistQuick();refreshQuickRecordPanels();
-  if(input){input.value='';delete input.dataset.editId}
-  renderQuickInbox();
+  if(input){input.value='';delete input.dataset.editId;input.style.height='auto'}
+  renderQuickInbox();toast(type==='임시 보관함'?'임시 보관했어요':'저장했어요');
 }
 function renderQuickInbox(){
   const host=document.querySelector('#quickInbox');if(!host)return;
@@ -562,27 +565,28 @@ function setQuickMode(mode){
   document.querySelectorAll('.topbar [data-action]').forEach(b=>b.classList.toggle('action-active',b.dataset.action===mode));
   quickDock.classList.add('show');
   if(mode==='add'){
-    quickDock.innerHTML='<div class="quick-dock-inner"><input id="quickText" autocomplete="off" placeholder="생각난 내용…"><select id="quickType" aria-label="저장 위치"><option value="임시 보관함">임시 보관함</option><option value="Check">Check</option><option value="Calendar">Calendar</option><option value="Shopping">Shopping List</option><option value="Meal Plan">Meal Plan</option><option value="Someday">Someday</option><option value="Travel">Travel</option><option value="Scrapbook">Scrapbook</option></select><div class="quick-dock-actions"><button class="primary" id="quickSave">＋</button></div><div id="quickInbox" class="quick-inbox"></div></div>';
+    quickDock.innerHTML='<div class="quick-dock-inner"><textarea id="quickText" rows="2" autocomplete="off" placeholder="생각난 내용… 여러 줄로 붙여넣어도 돼요"></textarea><select id="quickType" aria-label="저장 위치"><option value="임시 보관함">자동 분류 · 임시 보관함</option><option value="Check">Check</option><option value="Calendar">Calendar</option><option value="Shopping">Shopping List</option><option value="Meal Plan">Meal Plan</option><option value="Someday">Someday</option><option value="Travel">Travel</option><option value="Scrapbook">Scrapbook</option></select><div class="quick-dock-actions"><button class="primary" id="quickSave">＋ 저장</button></div><div id="quickInbox" class="quick-inbox"></div></div>';
     document.querySelector('#quickSave').onclick=saveQuickRecord;renderQuickInbox();
   }else if(mode==='search'){
     quickDock.innerHTML='<div class="quick-dock-inner"><input id="globalSearch" type="search" autocomplete="off" placeholder="검색…"><div class="quick-results" id="globalResults"></div></div>';
     document.querySelector('#globalSearch').oninput=runGlobalSearch;
   }else if(mode==='voice'){
-    quickDock.innerHTML='<div class="quick-dock-inner"><input id="quickText" autocomplete="off" placeholder="음성 입력 내용…"><div class="quick-dock-actions"><button class="primary" id="voiceSave">＋</button><button id="voiceSearch">⌕</button><button id="voiceAgain">↻</button></div><span id="voiceStatus" class="quick-dock-title">듣고 있어요…</span></div>';
+    quickDock.innerHTML='<div class="quick-dock-inner"><textarea id="quickText" rows="2" autocomplete="off" placeholder="음성 입력 내용…"></textarea><select id="quickType" aria-label="저장 위치"><option value="임시 보관함">자동 분류 · 임시 보관함</option><option value="Check">Check</option><option value="Calendar">Calendar</option><option value="Shopping">Shopping List</option><option value="Meal Plan">Meal Plan</option><option value="Someday">Someday</option><option value="Travel">Travel</option><option value="Scrapbook">Scrapbook</option></select><div class="quick-dock-actions"><button class="primary" id="voiceSave">＋ 저장</button><button id="voiceSearch">⌕</button><button id="voiceAgain">↻</button></div><span id="voiceStatus" class="quick-dock-title">듣고 있어요…</span></div>';
     document.querySelector('#voiceSave').onclick=saveQuickRecord;
     document.querySelector('#voiceSearch').onclick=()=>{const q=document.querySelector('#quickText').value.trim();setQuickMode('search');const input=document.querySelector('#globalSearch');input.value=q;runGlobalSearch()};
     document.querySelector('#voiceAgain').onclick=startVoiceRecognition;
     startVoiceRecognition();
   }
-  const input=quickDock.querySelector('input');
-  if(input){input.style.fontSize='16px';if(mode!=='voice')input.focus({preventScroll:true})}
+  const input=quickDock.querySelector('input,textarea');
+  if(input){input.style.fontSize='16px';if(input.tagName==='TEXTAREA'){const grow=()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,Math.round(window.innerHeight*.55))+'px'};input.addEventListener('input',grow);grow()}if(mode!=='voice')input.focus({preventScroll:true})}
 }
 function saveQuickRecord(){
   const input=document.querySelector('#quickText'),title=input?.value.trim();if(!title){input?.focus({preventScroll:true});return}
+  const type=document.querySelector('#quickType')?.value||'임시 보관함';
   const editId=Number(input.dataset.editId||0),old=quickRecords.find(r=>r.id===editId);
-  if(old){old.title=title;old.updatedAt=new Date().toISOString()}
-  else quickRecords.unshift({id:Date.now(),title,type:'임시 보관함',createdAt:new Date().toISOString()});
-  persistQuick();refreshQuickRecordPanels();if(input){input.value='';delete input.dataset.editId}closeQuickDock();toast('임시 보관했어요');
+  if(old){old.title=title;old.type=type;old.updatedAt=new Date().toISOString()}
+  else quickRecords.unshift({id:Date.now(),title,type,createdAt:new Date().toISOString()});
+  persistQuick();refreshQuickRecordPanels();if(input){input.value='';delete input.dataset.editId}closeQuickDock();toast(type==='임시 보관함'?'임시 보관했어요':'저장했어요');
 }
 function deleteQuickRecord(id){const r=quickRecords.find(x=>x.id===id);if(!r)return;if(!confirm('“'+r.title+'” 기록을 삭제할까요?'))return;quickRecords=quickRecords.filter(x=>x.id!==id);persistQuick();refreshQuickRecordPanels();renderQuickInbox();toast('기록을 삭제했어요')}
 function sendQuickRecordToMeal(id,destination){const r=quickRecords.find(x=>x.id===id);if(!r)return;if(!state.opened.includes('meal'))toggleMenu('meal');const frame=document.querySelector('#mealFrame');const run=()=>{const w=frame?.contentWindow,fn=destination==='recipe'?'WN_ADD_QUICK_RECIPE':'WN_ADD_QUICK_PLAN';if(typeof w?.[fn]!=='function'){toast('밀 플랜을 불러오지 못했어요. 다시 시도해 주세요.');return}if(w[fn](r.title)){quickRecords=quickRecords.filter(x=>x.id!==id);persistQuick();refreshQuickRecordPanels();renderQuickInbox();toast(destination==='recipe'?'레시피로 옮겼어요':'밀 플랜에 담았어요')}};if(frame?.contentWindow?.WN_ADD_QUICK_RECIPE||frame?.contentWindow?.WN_ADD_QUICK_PLAN)run();else if(frame)frame.addEventListener('load',run,{once:true});else toast('밀 플랜 메뉴를 열어 주세요')}
