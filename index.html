@@ -147,6 +147,20 @@ main {flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-be
 .utility-row .menu-btn[data-menu="database"].active{background:#E8F1F3;border-color:#BED6DC;color:#4F737D}
 .utility-row .menu-btn[data-menu="settings"].active{background:#EEECE8;border-color:#D1CDC4;color:#68645C}
 
+/* UNIQUE SECTION COLORS — each menu has its own visual identity */
+.menu-btn.active[data-menu="check"]{background:#FBE5E5;border-color:#E9B7B7;color:#A64F55}
+.menu-btn.active[data-menu="meal"]{background:#FBECE2;border-color:#EAC8AE;color:#986344}
+.menu-btn.active[data-menu="calendar"]{background:#F0EEE9;border-color:#D1CABC;color:#716B60}
+.menu-btn.active[data-menu="map"]{background:#E8EDF6;border-color:#B9C9E2;color:#52658B}
+.menu-btn.active[data-menu="someday"]{background:#F8F1D9;border-color:#E8D99F;color:#8A7438}
+.menu-btn.active[data-menu="benefits"]{background:#E5F1EF;border-color:#B7D8D1;color:#47766D}
+.menu-btn.active[data-menu="travel"]{background:#F0EAF7;border-color:#D2C2E5;color:#70568A}
+.menu-btn.active[data-menu="scrapbook"]{background:#F8EAF0;border-color:#E8C9D6;color:#88596D}
+.menu-btn.active[data-menu="gallery"]{background:#FBE9E5;border-color:#EBC3B9;color:#A45F52}
+.menu-btn.active[data-menu="database"]{background:#E8F2E8;border-color:#C0D9BE;color:#557A52}
+.menu-btn.active[data-menu="settings"]{background:#ECEEF1;border-color:#C8CDD5;color:#5E6877}
+.menu-btn.active[data-menu="shopping"]{background:#F7F0DE;border-color:#E4D6B5;color:#786943}
+
 /* INLINE QUICK ACTIONS */
 .shopping-dock{display:none;padding:8px 12px 12px;background:var(--bg)}.shopping-dock.show{display:block}.shopping-dock .panel{display:block;margin:0;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}.shopping-dock .panel-toolbar{justify-content:stretch;gap:6px;padding:2px 4px;background:#fff}.shopping-dock .panel-head{display:flex;min-height:48px;padding:11px 12px;gap:9px}.shopping-dock .panel-head svg{width:20px;height:20px}.shopping-dock .panel-body{background:#fff;padding:0}.shopping-dock .panel.collapsed .panel-body{height:0;min-height:0;overflow:hidden}.shopping-dock iframe{display:block;width:100%;height:min(68dvh,620px);min-height:260px;border:0;border-radius:0;background:transparent}
 .quick-dock {display:none;padding:9px 12px 11px;background:#fff;border-bottom:1px solid var(--line)}
@@ -446,14 +460,7 @@ function toggleMenu(id){
  if(!opening){state.opened=state.opened.filter(x=>x!==id);state.collapsed=state.collapsed.filter(x=>x!==id)}
  else{state.opened.push(id);state.collapsed=state.collapsed.filter(x=>x!==id)}
  save();render();
- if(opening){
-   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-     const main=document.querySelector('main'),node=panelNodes[id];
-     if(!main||!node)return;
-     const y=node.getBoundingClientRect().top-main.getBoundingClientRect().top+main.scrollTop;
-     main.scrollTo({top:Math.max(0,y),behavior:'smooth'});
-   }));
- }
+
  if(id==='meal'&&opening){const f=document.querySelector('#mealFrame');try{if(f?.contentWindow?.setPage)f.contentWindow.setPage('planner');if(f?.contentWindow)f.contentWindow.scrollTo(0,0)}catch(e){}}
 }
 function toast(s){const t=document.querySelector('#toast');t.textContent=s;t.classList.add('show');clearTimeout(window._toastTimer);window._toastTimer=setTimeout(()=>t.classList.remove('show'),1600)}
