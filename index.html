@@ -548,7 +548,7 @@ function renderQuickInbox(){
   const rows=quickRecords.filter(r=>r.type==='임시 보관함');
   const safe=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   host.innerHTML=rows.map(r=>'<button type="button" class="quick-record-card" data-draft-id="'+r.id+'"><span>'+safe(r.title)+'</span><small>수정</small></button>').join('');
-  host.querySelectorAll('[data-draft-id]').forEach(b=>b.onclick=()=>{const r=quickRecords.find(x=>x.id===Number(b.dataset.draftId)),input=document.querySelector('#quickText');if(r&&input){input.value=r.title;input.dataset.editId=r.id;input.focus({preventScroll:true})}});
+  host.querySelectorAll('[data-draft-id]').forEach(b=>b.onclick=()=>{const r=quickRecords.find(x=>x.id===Number(b.dataset.draftId)),input=document.querySelector('#quickText');if(r&&input){input.value=r.title;input.dataset.editId=r.id;const type=document.querySelector('#quickType');if(type)type.value=r.type||'임시 보관함';input.focus({preventScroll:true})}});
 }
 function closeQuickDock(){
   if(activeRecognition){try{activeRecognition.stop()}catch(e){}activeRecognition=null}
