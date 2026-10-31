@@ -594,9 +594,9 @@ function setQuickMode(mode){
 }
 function quickShoppingBatch(text){
  const lines=String(text||'').split(/\n+/),out=[];let store='';
- const keys=[['costco',/^(costco|코스트코)$/i],['trader-joes',/^(trader\s*joe'?s|tj'?s|트레이더\s*조)$/i],['whole-foods',/^(whole\s*foods?|홀푸드)$/i],['korean-market',/^(korean\s*market|한인\s*마트|한국\s*마트)$/i]];
+ const keys=[['costco',/^(costco|코스트코)$/i],['trader-joes',/^(trader\s*joe['’]?s|tj'?s|트레이더\s*조)$/i],['whole-foods',/^(whole\s*foods?|홀푸드)$/i],['korean-market',/^(korean\s*market|한인\s*마트|한국\s*마트)$/i]];
  for(let raw of lines){let line=raw.trim().replace(/^[-*•▪︎]+\s*/,'');if(!line)continue;
-  let inline=line.match(/^(costco|trader\s*joe'?s|whole\s*foods?|korean\s*market|한인\s*마트|한국\s*마트)\s*[:：-]\s*(.+)$/i);
+  let inline=line.match(/^(costco|trader\s*joe['’]?s|whole\s*foods?|korean\s*market|한인\s*마트|한국\s*마트)\s*[:：-]\s*(.+)$/i);
   if(inline){const k=keys.find(x=>x[1].test(inline[1]));if(k)store=k[0];line=inline[2]}
   else{const k=keys.find(x=>x[1].test(line));if(k){store=k[0];continue}}
   line.split(/[,;，；]+/).map(x=>x.trim()).filter(Boolean).forEach(name=>out.push({name,store:store||undefined,priority:'urgent'}));
